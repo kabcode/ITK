@@ -20,7 +20,14 @@
 
 #include "itkProcessObject.h"
 #include <deque>
-#include <functional>
+
+template< class Arg1, class Arg2, class Result >
+struct binary_function
+{
+  using first_argument_type = Arg1;
+  using second_argument_type = Arg2;
+  using result_type = Result;
+};
 
 namespace itk
 {
@@ -73,7 +80,7 @@ public:
   using ValueType = typename DequeType::value_type;
 
   /** Boolean comparison functor for use in sorting functions.  */
-  struct merge_comp : public std::binary_function<bool, const merge_t &, const merge_t &>
+  struct merge_comp : public binary_function<bool, const merge_t &, const merge_t &>
   {
     merge_comp() = default;
     bool
@@ -84,7 +91,7 @@ public:
   };
 
   /** Boolean comparison functor for use in sorting functions.   */
-  struct sort_comp : public std::binary_function<bool, const merge_t &, const merge_t &>
+  struct sort_comp : public binary_function<bool, const merge_t &, const merge_t &>
   {
     bool
     operator()(const merge_t & a, const merge_t & b)
