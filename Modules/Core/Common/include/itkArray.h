@@ -61,6 +61,9 @@ public:
    *  setting for memory management.                          */
   Array(const Array &);
 
+  /** Construct from a VnlVectorType */
+  explicit Array(const VnlVectorType &);
+
   /** Constructor with size. Size can only be changed by assignment */
   explicit Array(SizeValueType dimension);
 
@@ -70,7 +73,7 @@ public:
    * that location and it is the user's responsibility to delete it.
    * If "LetArrayManageMemory" is true, then this class will free the
    * memory when this object is destroyed. */
-  Array(ValueType * data, SizeValueType sz, bool LetArrayManageMemory = false);
+  Array(ValueType * datain, SizeValueType sz, bool LetArrayManageMemory = false);
 
 #if defined(ITK_LEGACY_REMOVE)
   /** Constructor that initializes array with contents from a user supplied
@@ -86,7 +89,7 @@ public:
    * that location and it is the user's responsibility to delete it.
    * If "LetArrayManageMemory" is true, then this class will free the
    * memory when this object is destroyed. */
-  Array(const ValueType * data, SizeValueType sz, bool LetArrayManageMemory = false);
+  Array(const ValueType * datain, SizeValueType sz, bool LetArrayManageMemory = false);
 #endif
 
   /** Constructor to initialize an array from another of any data type */
@@ -160,7 +163,7 @@ public:
    *       replaced by data array of exactly the same size
    */
   void
-  SetDataSameSize(TValue * data, bool LetArrayManageMemory = false);
+  SetDataSameSize(TValue * datain, bool LetArrayManageMemory = false);
 
   /** Similar to the previous method. In the above method, the size must be
    * separately set prior to using user-supplied data. This introduces an
@@ -172,7 +175,7 @@ public:
    * "LetArrayManageMemory" is true, then this class will free the
    * memory when this object is destroyed. */
   void
-  SetData(TValue * data, SizeValueType sz, bool LetArrayManageMemory = false);
+  SetData(TValue * datain, SizeValueType sz, bool LetArrayManageMemory = false);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning disable 444 // destructor for base class "itk::Array<>" is not virtual
