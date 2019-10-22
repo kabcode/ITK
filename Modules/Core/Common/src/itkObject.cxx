@@ -587,6 +587,26 @@ Object ::~Object()
   delete m_MetaDataDictionary;
 }
 
+  /**
+   * Creates a clone of the object itself. It copies the behavior but no the inputs and outputs.
+   */
+LightObject::Pointer
+Object::InternalClone() const
+{
+  typename LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type "
+      << this->GetNameOfClass()
+      << " failed.");
+  }
+  rval->SetDebug(this->GetDebug());
+  rval->SetMetaDataDictionary(this->GetMetaDataDictionary());
+  return loPtr;
+}
+
 /**
  * Chaining method to print an object's instance variables, as well as
  * its superclasses.

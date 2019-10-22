@@ -220,6 +220,7 @@ public:
 protected:
   Object();
   ~Object() override;
+  virtual typename LightObject::Pointer InternalClone() const override;
 
   /** Methods invoked by Print() to print information about the object
    * including superclasses. Typically not called by the user (use Print()
