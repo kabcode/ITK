@@ -236,6 +236,23 @@ GaussianInterpolateImageFunction<TImageType, TCoordRep>::GetRadius() const
 }
 
 
+template <typename TInputImage, typename TCoordRep>
+LightObject::Pointer
+GaussianInterpolateImageFunction<TInputImage, TCoordRep>::InternalClone() const
+{
+  typename itk::LightObject::Pointer loPtr = typename Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetAlpha(this->GetAlpha());
+  rval->SetSigma(this->GetSigma());
+
+  return loPtr;
+}
+
 template <typename TImageType, typename TCoordRep>
 void
 GaussianInterpolateImageFunction<TImageType, TCoordRep>::PrintSelf(std::ostream & os, Indent indent) const

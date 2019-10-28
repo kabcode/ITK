@@ -338,8 +338,8 @@ protected:
 
   BSplineInterpolateImageFunction();
   ~BSplineInterpolateImageFunction() override;
-  void
-  PrintSelf(std::ostream & os, Indent indent) const override;
+  LightObject::Pointer InternalClone() const override;
+  void   PrintSelf(std::ostream & os, Indent indent) const override;
 
   // These are needed by the smoothing spline routine.
   // temp storage for processing of Coefficients

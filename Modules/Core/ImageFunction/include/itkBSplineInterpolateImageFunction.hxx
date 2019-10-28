@@ -72,6 +72,24 @@ BSplineInterpolateImageFunction<TImageType, TCoordRep, TCoefficientType>::~BSpli
   m_ThreadedWeightsDerivative = nullptr;
 }
 
+template <typename TImageType, typename TCoordRep, typename TCoefficientType>
+LightObject::Pointer
+BSplineInterpolateImageFunction<TImageType, TCoordRep, TCoefficientType>::InternalClone() const
+{
+  typename itk::LightObject::Pointer loPtr = typename Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetSplineOrder(this->GetSplineOrder());
+  rval->SetNumberOfWorkUnits(this->GetNumberOfWorkUnits());
+  rval->SetUseImageDirection(this->GetUseImageDirection());
+
+  return loPtr;
+}
+
 /**
  * Standard "PrintSelf" method
  */

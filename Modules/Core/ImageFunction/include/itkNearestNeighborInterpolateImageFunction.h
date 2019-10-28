@@ -97,12 +97,28 @@ public:
 protected:
   NearestNeighborInterpolateImageFunction() = default;
   ~NearestNeighborInterpolateImageFunction() override = default;
+  LightObject::Pointer InternalClone() const override;
   void
   PrintSelf(std::ostream & os, Indent indent) const override
   {
     Superclass::PrintSelf(os, indent);
   }
 };
+
+template <typename TInputImage, typename TCoordRep>
+LightObject::Pointer
+NearestNeighborInterpolateImageFunction<TInputImage, TCoordRep>
+::InternalClone() const
+{
+  typename itk::LightObject::Pointer loPtr = typename Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  return loPtr;
+}
 } // end namespace itk
 
 #endif
