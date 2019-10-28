@@ -79,6 +79,23 @@ MatrixOffsetTransformBase<TParametersValueType, NInputDimensions, NOutputDimensi
   this->ComputeMatrixParameters();
 }
 
+template <typename TParametersValueType, unsigned NInputDimensions, unsigned NOutputDimensions>
+LightObject::Pointer
+MatrixOffsetTransformBase<TParametersValueType, NInputDimensions, NOutputDimensions>::InternalClone() const
+{
+  typename LightObject::Pointer loPtr = Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetMatrix(this->GetMatrix());
+  rval->SetOffset(this->GetOffset());
+
+  return loPtr;
+}
+
 template <typename TParametersValueType, unsigned int NInputDimensions, unsigned int NOutputDimensions>
 void
 MatrixOffsetTransformBase<TParametersValueType, NInputDimensions, NOutputDimensions>::PrintSelf(std::ostream & os,

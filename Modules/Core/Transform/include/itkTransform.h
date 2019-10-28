@@ -547,8 +547,7 @@ protected:
    * This does a complete copy of the transform
    * state to the new transform
    */
-  typename LightObject::Pointer
-  InternalClone() const override;
+  virtual typename LightObject::Pointer InternalClone() const override;
 
   Transform();
   Transform(NumberOfParametersType NumberOfParameters);

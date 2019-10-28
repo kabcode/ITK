@@ -21,6 +21,18 @@
 
 namespace itk
 {
+  template <typename TParametersValueType>
+  LightObject::Pointer TransformBaseTemplate<TParametersValueType>::InternalClone() const
+  {
+    typename LightObject::Pointer loPtr = Superclass::InternalClone();
+    typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+    if (rval.IsNull())
+    {
+      itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+    }
+    return loPtr;
+  }
+
 /** Print enum values */
 std::ostream &
 operator<<(std::ostream & out, const typename TransformBaseTemplate<double>::TransformCategoryType value)

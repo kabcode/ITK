@@ -278,6 +278,7 @@ protected:
 
   /** Destroy an AffineTransform object   */
   ~AffineTransform() override = default;
+  virtual typename LightObject::Pointer InternalClone() const override;
 
   /** Print contents of an AffineTransform */
   void

@@ -157,7 +157,10 @@ protected:
   TransformBaseTemplate() = default;
   ~TransformBaseTemplate() override = default;
 #endif
+
+  virtual typename LightObject::Pointer InternalClone() const override;
 };
+
 
 /** This helps to meet backward compatibility */
 using TransformBase = TransformBaseTemplate<double>;
