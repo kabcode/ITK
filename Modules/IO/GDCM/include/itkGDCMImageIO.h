@@ -28,7 +28,9 @@
 #ifndef itkGDCMImageIO_h
 #define itkGDCMImageIO_h
 
-#define ITKIO_DEPRECATED_GDCM1_API
+#if !defined(ITK_LEGACY_REMOVE)
+#  define ITKIO_DEPRECATED_GDCM1_API
+#endif
 
 #include "itkImageIOBase.h"
 #include "ITKIOGDCMExport.h"
@@ -163,6 +165,13 @@ public:
   itkSetMacro(LoadPrivateTags, bool);
   itkGetConstMacro(LoadPrivateTags, bool);
   itkBooleanMacro(LoadPrivateTags);
+
+  /** Convert Y'CbCr (YBR_FULL, YBR_FULL_422) to RGB. Default is true.
+   * Not required for YBR_RCT and YBR_ICT.
+   */
+  itkSetMacro(ReadYBRtoRGB, bool);
+  itkGetConstMacro(ReadYBRtoRGB, bool);
+  itkBooleanMacro(ReadYBRtoRGB);
 
 #if defined(ITKIO_DEPRECATED_GDCM1_API)
   /** Convenience methods to query patient information and scanner
@@ -325,7 +334,7 @@ public:
     JPEGLS,
     RLE
   };
-#if !defined(ITK_LEGACY_REMOVE)
+#if !defined(ITK_LEGACY_REMOVE) || defined(ITK_WRAPPING) /* castxml 'enum class' workaround */
   // We need to expose the enum values at the class level
   // for backwards compatibility
   static constexpr TCompressionType JPEG = TCompressionType::JPEG;
@@ -360,6 +369,8 @@ protected:
   bool m_KeepOriginalUID;
 
   bool m_LoadPrivateTags;
+
+  bool m_ReadYBRtoRGB;
 
 private:
 #if defined(ITKIO_DEPRECATED_GDCM1_API)
