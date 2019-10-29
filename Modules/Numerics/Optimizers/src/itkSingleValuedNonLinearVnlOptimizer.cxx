@@ -93,6 +93,22 @@ SingleValuedNonLinearVnlOptimizer ::IterationReport(const EventObject & event)
   this->InvokeEvent(event);
 }
 
+LightObject::Pointer
+SingleValuedNonLinearVnlOptimizer::InternalClone() const
+{
+  // Default implementation just copies the parameters from
+  // this to new optimizer.
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+  rval->SetMaximize(this->GetMaximize());
+  return loPtr;
+}
+
 /**
  * PrintSelf
  */
@@ -107,6 +123,8 @@ SingleValuedNonLinearVnlOptimizer ::PrintSelf(std::ostream & os, Indent indent) 
   os << "Command observer " << m_Command.GetPointer() << std::endl;
   os << "Cost Function adaptor" << m_CostFunctionAdaptor << std::endl;
 }
+
+
 } // end namespace itk
 
 #endif

@@ -104,6 +104,7 @@ public:
 protected:
   SingleValuedNonLinearVnlOptimizer();
   ~SingleValuedNonLinearVnlOptimizer() override;
+  LightObject::Pointer InternalClone() const override;
 
   using CostFunctionAdaptorType = SingleValuedVnlCostFunctionAdaptor;
 

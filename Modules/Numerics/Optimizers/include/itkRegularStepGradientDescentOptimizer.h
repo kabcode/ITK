@@ -54,6 +54,7 @@ public:
 protected:
   RegularStepGradientDescentOptimizer() = default;
   ~RegularStepGradientDescentOptimizer() override = default;
+  LightObject::Pointer InternalClone() const override;
 
   /** Advance one step along the corrected gradient taking into
    * account the steplength represented by factor.

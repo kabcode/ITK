@@ -21,6 +21,8 @@
 #include "itkOnePlusOneEvolutionaryOptimizer.h"
 #include "vnl/vnl_matrix.h"
 #include "itkMath.h"
+#include "itkMersenneTwisterRandomVariateGenerator.h"
+#include "itkNormalVariateGenerator.h"
 namespace itk
 {
 OnePlusOneEvolutionaryOptimizer ::OnePlusOneEvolutionaryOptimizer()
@@ -290,6 +292,48 @@ const std::string
 OnePlusOneEvolutionaryOptimizer ::GetStopConditionDescription() const
 {
   return m_StopConditionDescription.str();
+}
+
+LightObject::Pointer
+OnePlusOneEvolutionaryOptimizer::InternalClone() const
+{
+  // Default implementation just copies the parameters from this to the new metric.
+  typename itk::LightObject::Pointer loPtr = Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetMaximize(this->GetMaximize());
+  rval->SetMaximumIteration(this->GetMaximumIteration());
+  rval->SetGrowthFactor(this->GetGrowthFactor());
+  rval->SetShrinkFactor(this->GetShrinkFactor());
+  rval->SetInitialRadius(this->GetInitialRadius());
+  rval->SetEpsilon(this->GetEpsilon());
+  rval->SetCatchGetValueException(this->GetCatchGetValueException());
+  rval->SetMetricWorstPossibleValue(this->GetMetricWorstPossibleValue());
+
+  if (this->m_RandomGenerator != nullptr)
+  {
+    if (dynamic_cast<Statistics::NormalVariateGenerator*>(this->m_RandomGenerator.GetPointer())
+      != nullptr)
+    {
+      auto tmpGenerator = Statistics::NormalVariateGenerator::New();
+      tmpGenerator->Initialize(0);
+      rval->SetNormalVariateGenerator(tmpGenerator);
+    }
+    else
+    {
+      auto tmpGenerator = Statistics::MersenneTwisterRandomVariateGenerator::New();
+      tmpGenerator->Initialize(0);
+      rval->SetNormalVariateGenerator(tmpGenerator);
+    }
+
+
+  }
+
+  return loPtr;
 }
 
 /**

@@ -219,6 +219,30 @@ FRPROptimizer ::SetToFletchReeves()
   m_OptimizationType = FletchReeves;
 }
 
+LightObject::Pointer
+FRPROptimizer::InternalClone() const
+{
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  if (this->m_OptimizationType == FletchReeves)
+  {
+    rval->SetToFletchReeves();
+  }
+  else
+  {
+    rval->SetToPolakRibiere();
+  }
+  rval->SetUseUnitLengthGradient(this->GetUseUnitLengthGradient());
+
+  return loPtr;
+}
+
 /**
  *
  */
@@ -230,5 +254,7 @@ FRPROptimizer ::PrintSelf(std::ostream & os, Indent indent) const
   os << indent << "0=FletchReeves, 1=PolakRibiere" << std::endl;
   os << indent << "Use unit length gradient = " << m_UseUnitLengthGradient << std::endl;
 }
+
+
 } // end of namespace itk
 #endif

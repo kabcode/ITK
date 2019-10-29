@@ -48,6 +48,33 @@ SPSAOptimizer ::SPSAOptimizer()
   m_Generator = Statistics::MersenneTwisterRandomVariateGenerator::GetInstance();
 } // end Constructor
 
+LightObject::Pointer
+SPSAOptimizer
+::InternalClone() const
+{
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetMaximize(this->GetMaximize());
+  rval->SetSa(this->GetSa());
+  rval->SetSc(this->GetSc());
+  rval->SetA(this->GetA());
+  rval->SetAlpha(this->GetAlpha());
+  rval->SetGamma(this->GetGamma());
+  rval->SetNumberOfPerturbations(this->GetNumberOfPerturbations());
+  rval->SetTolerance(this->GetTolerance());
+  rval->SetMaximumNumberOfIterations(this->GetMaximumNumberOfIterations());
+  rval->SetMinimumNumberOfIterations(this->GetMinimumNumberOfIterations());
+  rval->SetStateOfConvergenceDecayRate(this->GetStateOfConvergenceDecayRate());
+
+  return loPtr;
+}
+
 /**
  * ************************* PrintSelf **************************
  */

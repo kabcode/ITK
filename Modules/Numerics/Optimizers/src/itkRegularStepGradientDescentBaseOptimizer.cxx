@@ -246,6 +246,27 @@ RegularStepGradientDescentBaseOptimizer ::GetStopConditionDescription() const
   return m_StopConditionDescription.str();
 }
 
+LightObject::Pointer
+RegularStepGradientDescentBaseOptimizer
+::InternalClone() const
+{
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetMaximize(this->GetMaximize());
+  rval->SetMaximumStepLength(this->GetMaximumStepLength());
+  rval->SetMinimumStepLength(this->GetMinimumStepLength());
+  rval->SetRelaxationFactor(this->GetRelaxationFactor());
+  rval->SetNumberOfIterations(this->GetNumberOfIterations());
+  rval->SetGradientMagnitudeTolerance(this->GetGradientMagnitudeTolerance());
+  return loPtr;
+}
+
 void
 RegularStepGradientDescentBaseOptimizer ::PrintSelf(std::ostream & os, Indent indent) const
 {

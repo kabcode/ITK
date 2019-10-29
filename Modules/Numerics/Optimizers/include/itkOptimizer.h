@@ -94,6 +94,7 @@ public:
 protected:
   Optimizer();
   ~Optimizer() override = default;
+  LightObject::Pointer InternalClone() const override;
   void
   PrintSelf(std::ostream & os, Indent indent) const override;
 

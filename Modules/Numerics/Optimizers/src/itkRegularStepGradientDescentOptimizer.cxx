@@ -45,6 +45,20 @@ RegularStepGradientDescentOptimizer ::StepAlongGradient(double factor, const Der
 
   this->SetCurrentPosition(newPosition);
 }
+
+LightObject::Pointer
+RegularStepGradientDescentOptimizer
+::InternalClone() const
+{
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+  return loPtr;
+}
+
 } // end namespace itk
 
 #endif

@@ -536,6 +536,29 @@ PowellOptimizer ::GetStopConditionDescription() const
   return m_StopConditionDescription.str();
 }
 
+LightObject::Pointer
+PowellOptimizer::InternalClone() const
+{
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetMaximize(this->GetMaximize());
+  rval->SetMaximumIteration(this->GetMaximumIteration());
+  rval->SetMaximumLineIteration(this->GetMaximumLineIteration());
+  rval->SetStepLength(this->GetStepLength());
+  rval->SetStepTolerance(this->GetStepTolerance());
+  rval->SetValueTolerance(this->GetValueTolerance());
+  rval->SetMetricWorstPossibleValue(this->GetMetricWorstPossibleValue());
+  rval->SetCatchGetValueException(this->GetCatchGetValueException());
+
+  return loPtr;
+}
+
 /**
  *
  */
@@ -560,5 +583,7 @@ PowellOptimizer ::PrintSelf(std::ostream & os, Indent indent) const
   os << indent << "Current Line Iteration " << m_CurrentLineIteration << std::endl;
   os << indent << "Stop              " << m_Stop << std::endl;
 }
+
+
 } // end of namespace itk
 #endif

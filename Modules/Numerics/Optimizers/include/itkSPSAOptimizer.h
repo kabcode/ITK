@@ -245,6 +245,7 @@ public:
 protected:
   SPSAOptimizer();
   ~SPSAOptimizer() override = default;
+  LightObject::Pointer InternalClone() const override;
 
   /** PrintSelf method. */
   void

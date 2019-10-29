@@ -194,6 +194,7 @@ protected:
   OnePlusOneEvolutionaryOptimizer();
   OnePlusOneEvolutionaryOptimizer(const OnePlusOneEvolutionaryOptimizer &);
   ~OnePlusOneEvolutionaryOptimizer() override = default;
+  LightObject::Pointer InternalClone() const override;
   void
   PrintSelf(std::ostream & os, Indent indent) const override;
 

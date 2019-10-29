@@ -74,6 +74,24 @@ SingleValuedNonLinearOptimizer ::GetValue(const ParametersType & parameters) con
   return this->GetCostFunction()->GetValue(parameters);
 }
 
+LightObject::Pointer
+SingleValuedNonLinearOptimizer
+::InternalClone() const
+{
+  // Default implementation just copies the parameters from
+  // this to new optimizer.
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  return loPtr;
+
+}
+
 void
 SingleValuedNonLinearOptimizer ::PrintSelf(std::ostream & os, Indent indent) const
 {

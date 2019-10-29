@@ -47,6 +47,30 @@ AmoebaOptimizer ::GetStopConditionDescription() const
   return this->m_StopConditionDescription.str();
 }
 
+LightObject::Pointer
+AmoebaOptimizer
+::InternalClone() const
+{
+  // Default implementation just copies the parameters from
+  // this to new optimizer.
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetMaximumNumberOfIterations(this->GetMaximumNumberOfIterations());
+  rval->SetOptimizeWithRestarts(this->GetOptimizeWithRestarts());
+  rval->SetParametersConvergenceTolerance(this->GetParametersConvergenceTolerance());
+  rval->SetFunctionConvergenceTolerance(this->GetFunctionConvergenceTolerance());
+  rval->SetInitialSimplexDelta(this->GetInitialSimplexDelta());
+  rval->SetAutomaticInitialSimplex(this->GetAutomaticInitialSimplex());
+
+  return loPtr;
+}
+
 
 void
 AmoebaOptimizer ::PrintSelf(std::ostream & os, Indent indent) const
@@ -324,5 +348,6 @@ AmoebaOptimizer ::ValidateSettings()
     itkExceptionMacro(<< "negative function convergence tolerance")
   }
 }
+
 
 } // end namespace itk

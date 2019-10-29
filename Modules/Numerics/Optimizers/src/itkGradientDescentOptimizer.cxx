@@ -39,6 +39,24 @@ GradientDescentOptimizer ::GetStopConditionDescription() const
   return m_StopConditionDescription.str();
 }
 
+LightObject::Pointer
+GradientDescentOptimizer
+::InternalClone() const
+{
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetMaximize(this->GetMaximize());
+  rval->SetLearningRate(this->GetLearningRate());
+  rval->SetNumberOfIterations(this->GetNumberOfIterations());
+  return loPtr;
+}
+
 void
 GradientDescentOptimizer ::PrintSelf(std::ostream & os, Indent indent) const
 {

@@ -57,6 +57,7 @@ public:
 protected:
   NonLinearOptimizer() = default;
   ~NonLinearOptimizer() override;
+  LightObject::Pointer InternalClone() const override;
 };
 } // end namespace itk
 

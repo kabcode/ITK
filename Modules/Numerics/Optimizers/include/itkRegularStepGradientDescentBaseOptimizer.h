@@ -133,6 +133,7 @@ public:
 protected:
   RegularStepGradientDescentBaseOptimizer();
   ~RegularStepGradientDescentBaseOptimizer() override = default;
+  LightObject::Pointer InternalClone() const override;
   void
   PrintSelf(std::ostream & os, Indent indent) const override;
 
