@@ -505,6 +505,7 @@ protected:
 
   /** Destroy an MatrixOffsetTransformBase object */
   ~MatrixOffsetTransformBase() override = default;
+  typename LightObject::Pointer InternalClone() const override;
 
   /** Print contents of an MatrixOffsetTransformBase */
   void

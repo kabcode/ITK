@@ -140,6 +140,7 @@ protected:
   Euler3DTransform();
 
   ~Euler3DTransform() override = default;
+  typename LightObject::Pointer InternalClone() const override;
 
   void
   PrintSelf(std::ostream & os, Indent indent) const override;

@@ -413,8 +413,7 @@ protected:
   PrintSelf(std::ostream & os, Indent indent) const override;
 
   /** Clone the current transform */
-  typename LightObject::Pointer
-  InternalClone() const override;
+  virtual typename LightObject::Pointer InternalClone() const override;
 
   void
   PushFrontTransform(TransformTypePointer t) override

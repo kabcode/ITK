@@ -160,6 +160,7 @@ protected:
   Rigid3DTransform(unsigned int paramDim);
   Rigid3DTransform();
   ~Rigid3DTransform() override = default;
+  typename LightObject::Pointer InternalClone() const override;
 
   /**
    * Print contents of an Rigid3DTransform
