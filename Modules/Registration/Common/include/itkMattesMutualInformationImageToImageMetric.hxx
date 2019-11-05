@@ -56,6 +56,24 @@ MattesMutualInformationImageToImageMetric<TFixedImage, TMovingImage>::~MattesMut
 }
 
 template <typename TFixedImage, typename TMovingImage>
+LightObject::Pointer
+MattesMutualInformationImageToImageMetric<TFixedImage, TMovingImage>::InternalClone() const
+{
+  // Default implementation just copies the parameters from this to the new metric.
+  typename itk::LightObject::Pointer loPtr = typename Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetNumberOfHistogramBins(this->GetNumberOfHistogramBins());
+  rval->SetUseExplicitPDFDerivatives(this->GetUseExplicitPDFDerivatives());
+
+  return loPtr;
+}
+
+template <typename TFixedImage, typename TMovingImage>
 void
 MattesMutualInformationImageToImageMetric<TFixedImage, TMovingImage>::PrintSelf(std::ostream & os, Indent indent) const
 {

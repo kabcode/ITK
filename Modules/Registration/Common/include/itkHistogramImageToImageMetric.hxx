@@ -44,6 +44,44 @@ HistogramImageToImageMetric<TFixedImage, TMovingImage>::HistogramImageToImageMet
 }
 
 template <typename TFixedImage, typename TMovingImage>
+LightObject::Pointer
+HistogramImageToImageMetric<TFixedImage, TMovingImage>::InternalClone() const
+{
+  // Default implementation just copies the parameters from this to the new metric.
+  typename itk::LightObject::Pointer loPtr = typename Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetHistogramSize(this->GetHistogramSize());
+  rval->SetUpperBoundIncreaseFactor(this->GetUpperBoundIncreaseFactor());
+
+  rval->SetDerivativeStepLength(this->GetDerivativeStepLength());
+  rval->SetDerivativeStepLengthScales(this->GetDerivativeStepLengthScales());
+
+  if (this->GetUsePaddingValue())
+  {
+    rval->SetUsePaddingValue(this->GetUsePaddingValue());
+    rval->SetPaddingValue(this->GetPaddingValue());
+  }
+
+  if (this->m_LowerBoundSetByUser)
+  {
+    rval->m_LowerBoundSetByUser = m_LowerBoundSetByUser;
+    rval->SetLowerBound(this->GetLowerBound());
+  }
+
+  if (this->m_UpperBoundSetByUser)
+  {
+    rval->m_UpperBoundSetByUser = m_UpperBoundSetByUser;
+    rval->SetUpperBound(this->GetUpperBound());
+  }
+  return loPtr;
+}
+
+template <typename TFixedImage, typename TMovingImage>
 void
 HistogramImageToImageMetric<TFixedImage, TMovingImage>::SetUpperBound(const MeasurementVectorType & bounds)
 {

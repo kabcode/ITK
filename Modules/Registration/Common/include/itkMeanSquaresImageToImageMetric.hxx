@@ -51,6 +51,21 @@ MeanSquaresImageToImageMetric<TFixedImage, TMovingImage>::~MeanSquaresImageToIma
   m_PerThread = nullptr;
 }
 
+template <typename TFixedImage, typename TMovingImage>
+LightObject::Pointer
+MeanSquaresImageToImageMetric<TFixedImage, TMovingImage>::InternalClone() const
+{
+  // Default implementation just copies the parameters from this to the new metric.
+  typename itk::LightObject::Pointer loPtr = typename Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  return loPtr;
+}
+
 /**
  * Print out internal information about this class
  */

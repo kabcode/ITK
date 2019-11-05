@@ -169,6 +169,7 @@ protected:
       create instances. */
   HistogramImageToImageMetric();
   ~HistogramImageToImageMetric() override = default;
+  LightObject::Pointer InternalClone() const override;
 
   /** The histogram size. */
   HistogramSizeType m_HistogramSize;

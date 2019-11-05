@@ -136,6 +136,20 @@ GradientDifferenceImageToImageMetric<TFixedImage, TMovingImage>::Initialize()
   }
 }
 
+template <typename TFixedImage, typename TMovingImage>
+LightObject::Pointer
+GradientDifferenceImageToImageMetric<TFixedImage, TMovingImage>::InternalClone() const
+{
+  typename LightObject::Pointer loPtr = Superclass::InternalClone();
+  typename Self::Pointer        rval = dynamic_cast<Self*>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+  rval->SetDerivativeDelta(this->GetDerivativeDelta());
+  return loPtr;
+}
+
 /**
  * PrintSelf
  */

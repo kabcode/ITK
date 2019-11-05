@@ -502,6 +502,22 @@ NormalizedCorrelationImageToImageMetric<TFixedImage, TMovingImage>::GetValueAndD
 }
 
 template <typename TFixedImage, typename TMovingImage>
+LightObject::Pointer
+NormalizedCorrelationImageToImageMetric<TFixedImage, TMovingImage>::InternalClone() const
+{
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetSubtractMean(this->GetSubtractMean());
+
+  return loPtr;
+}
+
+template <typename TFixedImage, typename TMovingImage>
 void
 NormalizedCorrelationImageToImageMetric<TFixedImage, TMovingImage>::PrintSelf(std::ostream & os, Indent indent) const
 {

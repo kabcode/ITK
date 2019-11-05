@@ -93,6 +93,30 @@ ImageToImageMetric<TFixedImage, TMovingImage>::~ImageToImageMetric()
   this->m_ThreaderBSplineTransformIndices = nullptr;
 }
 
+template <typename TFixedImage, typename TMovingImage>
+LightObject::Pointer
+ImageToImageMetric<TFixedImage, TMovingImage>::InternalClone() const
+{
+  // Default implementation just copies the parameters from this to the new metric.
+  typename itk::LightObject::Pointer loPtr = typename Superclass::InternalClone();
+  typename Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetUseAllPixels(this->GetUseAllPixels());
+  rval->SetUseFixedImageIndexes(this->GetUseFixedImageIndexes());
+  rval->SetComputeGradient(this->GetComputeGradient());
+  rval->SetUseCachingOfBSplineWeights(this->GetUseCachingOfBSplineWeights());
+  rval->SetUseFixedImageSamplesIntensityThreshold(this->GetUseFixedImageSamplesIntensityThreshold());
+  rval->SetNumberOfWorkUnits(this->GetNumberOfWorkUnits());
+  rval->SetNumberOfFixedImageSamples(this->GetNumberOfFixedImageSamples());
+  rval->SetUseSequentialSampling(this->GetUseSequentialSampling());
+
+  return loPtr;
+}
+
 /**
  * Set the number of work units. This will be clamped by the
  * multithreader, so we must check to see if it is accepted.
