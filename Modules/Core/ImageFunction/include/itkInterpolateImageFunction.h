@@ -57,6 +57,7 @@ public:
 
   /** Run-time type information (and related methods). */
   itkTypeMacro(InterpolateImageFunction, ImageFunction);
+  itkCloneMacro(Self);
 
   /** OutputType type alias support */
   using OutputType = typename Superclass::OutputType;
