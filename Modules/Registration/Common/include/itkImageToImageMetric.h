@@ -64,6 +64,7 @@ public:
 
   /** Run-time type information (and related methods). */
   itkTypeMacro(ImageToImageMetric, SingleValuedCostFunction);
+  itkCloneMacro(Self);
 
   /**  Type of the moving Image. */
   using MovingImageType = TMovingImage;
