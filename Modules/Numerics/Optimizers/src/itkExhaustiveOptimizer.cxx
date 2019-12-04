@@ -212,6 +212,23 @@ ExhaustiveOptimizer ::GetStopConditionDescription() const
   return m_StopConditionDescription.str();
 }
 
+LightObject::Pointer
+ExhaustiveOptimizer::InternalClone() const
+{
+  LightObject::Pointer loPtr = Superclass::InternalClone();
+
+  Self::Pointer rval = dynamic_cast<Self *>(loPtr.GetPointer());
+  if (rval.IsNull())
+  {
+    itkExceptionMacro(<< "downcast to type " << this->GetNameOfClass() << " failed.");
+  }
+
+  rval->SetNumberOfSteps(this->GetNumberOfSteps());
+  rval->SetStepLength(this->GetStepLength());
+
+  return loPtr;
+}
+
 void
 ExhaustiveOptimizer ::PrintSelf(std::ostream & os, Indent indent) const
 {
