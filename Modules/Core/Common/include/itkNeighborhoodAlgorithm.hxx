@@ -27,10 +27,10 @@ namespace itk
 namespace NeighborhoodAlgorithm
 {
 template <typename TImage>
-typename ImageBoundaryFacesCalculator<TImage>::FaceListType
-ImageBoundaryFacesCalculator<TImage>::operator()(const TImage * img, RegionType regionToProcess, RadiusType radius)
+auto
+ImageBoundaryFacesCalculator<TImage>::Compute(const TImage & img, RegionType regionToProcess, RadiusType radius)
+  -> Result
 {
-  unsigned int j, i;
   // Analyze the regionToProcess to determine if any of its faces are
   // along a buffer boundary (we have no data in the buffer for pixels
   // that are outside the boundary, but within the neighborhood radius and will
@@ -38,39 +38,43 @@ ImageBoundaryFacesCalculator<TImage>::operator()(const TImage * img, RegionType 
   // boundary region that will be processed. For instance, given a 2D image
   // and regionTOProcess (size = 5x5),
 
-  FaceListType faceList;
+  Result result;
+
+  const RegionType & bufferedRegion = img.GetBufferedRegion();
+
   // The portion of the regionToProcess that is outside of the image bufferedRegion
   // doesn't make sense. If the regionToProcess is completely outside of
-  // the image bufferedRegion, return a empty region list.
-  if (!regionToProcess.Crop(img->GetBufferedRegion()))
+  // the image bufferedRegion, return an empty (default-constructed) result.
+  if (!regionToProcess.Crop(bufferedRegion))
   {
-    return faceList;
+    return result;
   }
 
-  const IndexType bStart = img->GetBufferedRegion().GetIndex();
-  const SizeType  bSize = img->GetBufferedRegion().GetSize();
+  const IndexType bStart = bufferedRegion.GetIndex();
+  const SizeType  bSize = bufferedRegion.GetSize();
   const IndexType rStart = regionToProcess.GetIndex();
   const SizeType  rSize = regionToProcess.GetSize();
 
-  IndexValueType overlapLow, overlapHigh;
-  IndexType      fStart; // Boundary, "face"
-  SizeType       fSize;  // region data.
-  RegionType     fRegion;
-  SizeType       nbSize = regionToProcess.GetSize();   // Non-boundary region
-  IndexType      nbStart = regionToProcess.GetIndex(); // data.
-  RegionType     nbRegion;
+  SizeType  nbSize = rSize;   // Non-boundary region
+  IndexType nbStart = rStart; // data.
 
   IndexType vrStart =
     rStart; // start index of variable processed region which has considered the boundary region in last direction
   SizeType vrSize =
     rSize; // size of variable processed region which has considered the boundary region in last direction
 
-  for (i = 0; i < ImageDimension; ++i)
+  for (unsigned int i = 0; i < ImageDimension; ++i)
   {
-    overlapLow = static_cast<IndexValueType>((rStart[i] - radius[i]) - bStart[i]);
+    IndexType fStart; // Boundary, "face"
+    SizeType  fSize;  // region data.
+
+    auto overlapLow = static_cast<IndexValueType>((rStart[i] - radius[i]) - bStart[i]);
     // image buffered region should be more than twice of the radius,
     // otherwise there would be overlap between two boundary regions.
     // in the case, we reduce upper boundary size to remove overlap.
+
+    IndexValueType overlapHigh;
+
     if (bSize[i] > 2 * radius[i])
     {
       overlapHigh = static_cast<IndexValueType>((bStart[i] + bSize[i]) - (rStart[i] + rSize[i] + radius[i]));
@@ -80,11 +84,11 @@ ImageBoundaryFacesCalculator<TImage>::operator()(const TImage * img, RegionType 
       overlapHigh = static_cast<IndexValueType>((bStart[i] + radius[i]) - (rStart[i] + rSize[i]));
     }
 
-    if (overlapLow < 0)                    // out of bounds condition, define
-                                           // a region of
-    {                                      // iteration along this face
-      for (j = 0; j < ImageDimension; ++j) // define the starting index
-      {                                    // and size of the face region
+    if (overlapLow < 0)                                 // out of bounds condition, define
+                                                        // a region of
+    {                                                   // iteration along this face
+      for (unsigned int j = 0; j < ImageDimension; ++j) // define the starting index
+      {                                                 // and size of the face region
         fStart[j] = vrStart[j];
         if (j == i)
         {
@@ -119,13 +123,11 @@ ImageBoundaryFacesCalculator<TImage>::operator()(const TImage * img, RegionType 
         nbSize[i] -= fSize[i];
       }
       nbStart[i] += -overlapLow;
-      fRegion.SetIndex(fStart);
-      fRegion.SetSize(fSize);
-      faceList.push_back(fRegion);
+      result.m_BoundaryFaces.emplace_back(fStart, fSize);
     }
     if (overlapHigh < 0)
     {
-      for (j = 0; j < ImageDimension; ++j)
+      for (unsigned int j = 0; j < ImageDimension; ++j)
       {
         if (j == i)
         {
@@ -154,18 +156,33 @@ ImageBoundaryFacesCalculator<TImage>::operator()(const TImage * img, RegionType 
       {
         nbSize[i] -= fSize[i];
       }
-
-      fRegion.SetIndex(fStart);
-      fRegion.SetSize(fSize);
-      faceList.push_back(fRegion);
+      result.m_BoundaryFaces.emplace_back(fStart, fSize);
     }
   }
-  nbRegion.SetSize(nbSize);
-  nbRegion.SetIndex(nbStart);
-
-  faceList.push_front(nbRegion);
-  return faceList;
+  result.m_NonBoundaryRegion.SetSize(nbSize);
+  result.m_NonBoundaryRegion.SetIndex(nbStart);
+  return result;
 }
+
+
+template <typename TImage>
+typename ImageBoundaryFacesCalculator<TImage>::FaceListType
+ImageBoundaryFacesCalculator<TImage>::operator()(const TImage * img, RegionType regionToProcess, RadiusType radius)
+{
+  const auto result = Compute(*img, regionToProcess, radius);
+
+  if (result == Result{})
+  {
+    return FaceListType{};
+  }
+  else
+  {
+    FaceListType faceList = std::move(result.m_BoundaryFaces);
+    faceList.push_front(result.m_NonBoundaryRegion);
+    return faceList;
+  }
+}
+
 
 template <typename TImage>
 typename CalculateOutputWrapOffsetModifiers<TImage>::OffsetType

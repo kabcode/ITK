@@ -289,7 +289,7 @@ public:
   }; // end of class Iterator
 
   void
-  Print(std::ostream & os);
+  Print(std::ostream & os) const;
 
 protected:
   void
@@ -321,6 +321,6 @@ private:
 }; // end of class
 
 ITKPolynomials_EXPORT std::ostream &
-                      operator<<(std::ostream & os, MultivariateLegendrePolynomial & poly);
+                      operator<<(std::ostream & os, const MultivariateLegendrePolynomial & poly);
 } // end of namespace itk
 #endif

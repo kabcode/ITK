@@ -82,7 +82,7 @@ transformImage(const char * inputImageFileName, const char * outputImageFileName
   {
     writer->Update();
   }
-  catch (itk::ExceptionObject & error)
+  catch (const itk::ExceptionObject & error)
   {
     std::cerr << error << std::endl;
     return EXIT_FAILURE;
@@ -105,7 +105,7 @@ itkComplexToComplexFFTImageFilterTest(int argc, char * argv[])
   const std::string pixelTypeString(argv[3]);
 
   itk::ImageIOBase::Pointer imageIO =
-    itk::ImageIOFactory::CreateImageIO(inputImageFileName, itk::ImageIOFactory::FileModeType::ReadMode);
+    itk::ImageIOFactory::CreateImageIO(inputImageFileName, itk::ImageIOFactory::FileModeEnum::ReadMode);
   imageIO->SetFileName(inputImageFileName);
   imageIO->ReadImageInformation();
   const unsigned int dimension = imageIO->GetNumberOfDimensions();

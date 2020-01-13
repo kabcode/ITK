@@ -21,11 +21,11 @@ CreateTestDriver(ITKIOGDCM  "${ITKIOGDCM-Test_LIBRARIES}" "${ITKIOGDCMTests}")
 itk_add_test(NAME itkGDCMImageIOTest1
   COMMAND ITKIOGDCMTestDriver
   --compare
-    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest.mha
     DATA{Baseline/itkGDCMImageIOTestBaseline.mha}
+    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest.mha
   --compare
-    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTestRescaled.mha
     DATA{Baseline/itkGDCMImageIOTestRescaledBaseline.mha}
+    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTestRescaled.mha
   itkGDCMImageIOTest
     DATA{${ITK_DATA_ROOT}/Input/dicom-sc_cs-1.dcm}
     ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest.dcm
@@ -36,11 +36,11 @@ itk_add_test(NAME itkGDCMImageIOTest1
 itk_add_test(NAME itkGDCMImageIOTest2
   COMMAND ITKIOGDCMTestDriver
   --compare
-    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest2.mha
     DATA{Baseline/itkGDCMImageIOTest2Baseline.mha}
+    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest2.mha
   --compare
-    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest2Rescaled.mha
     DATA{Baseline/itkGDCMImageIOTest2RescaledBaseline.mha}
+    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest2Rescaled.mha
   itkGDCMImageIOTest
     DATA{${ITK_DATA_ROOT}/Input/itkGDCMImageIOTest.dcm}
     ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest2.dcm
@@ -51,11 +51,11 @@ itk_add_test(NAME itkGDCMImageIOTest2
 itk_add_test(NAME itkGDCMImageIOTest3
   COMMAND ITKIOGDCMTestDriver
   --compare
-    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest3.mha
     DATA{Baseline/itkGDCMImageIOTest3Baseline.mha}
+    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest3.mha
   --compare
-    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest3Rescaled.mha
     DATA{Baseline/itkGDCMImageIOTest3RescaledBaseline.mha}
+    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest3Rescaled.mha
   itkGDCMImageIOTest
     DATA{${ITK_DATA_ROOT}/Input/itkGDCMImageIOTest3.dcm}
     ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest3.dcm
@@ -66,11 +66,11 @@ itk_add_test(NAME itkGDCMImageIOTest3
 itk_add_test(NAME itkGDCMImageIOTest4
   COMMAND ITKIOGDCMTestDriver
   --compare
-    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest4.mha
     DATA{Baseline/itkGDCMImageIOTest4Baseline.mha}
+    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest4.mha
   --compare
-    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest4Rescaled.mha
     DATA{Baseline/itkGDCMImageIOTest4RescaledBaseline.mha}
+    ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest4Rescaled.mha
   itkGDCMImageIOTest
     DATA{${ITK_DATA_ROOT}/Input/012345.002.050}
     ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest4.dcm
@@ -149,8 +149,9 @@ itk_add_test(NAME itkGDCMLoadImageNoSpacingTest
 
 itk_add_test(NAME itkGDCMLegacyMultiFrameTest
   COMMAND ITKIOGDCMTestDriver
-    --compare ${ITK_TEST_OUTPUT_DIR}/itkGDCMLegacyMultiFrameTest.mha
+    --compare
       DATA{Baseline/itkGDCMLegacyMultiFrameTest.mha}
+      ${ITK_TEST_OUTPUT_DIR}/itkGDCMLegacyMultiFrameTest.mha
     itkGDCMLegacyMultiFrameTest
       # This dataset was derived from
       # https://www.dropbox.com/s/8m7ugu4cmw83fvd/dicoms-anon.zip?dl=0
@@ -167,11 +168,30 @@ itk_add_test(NAME itkGDCMImageIONoPreambleTest
 
 itk_add_test(NAME itkGDCMImageReadWriteTest_RGB
   COMMAND ITKIOGDCMTestDriver
-    --compare ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageReadWriteTest_RGB.mha
+    --compare
       DATA{Baseline/itkGDCMImageReadWriteTest_RGB.mha}
+      ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageReadWriteTest_RGB.mha
     itkGDCMImageReadWriteTest
       DATA{${ITK_DATA_ROOT}/Input/RGBDicomTest.dcm}
       ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageReadWriteTest_RGB.mha
+      rgb)
+
+itk_add_test(NAME itkGDCM_ComplianceTestRGB_JPEG2000ICT
+  COMMAND ITKIOGDCMTestDriver
+    --compare DATA{Baseline/US1_J2KI.mha}
+      ${ITK_TEST_OUTPUT_DIR}/itkGDCM_ComplianceTestRGB_JPEG2000ICT.mha
+    itkGDCMImageReadWriteTest
+      DATA{Input/US1_J2KI.dcm}
+      ${ITK_TEST_OUTPUT_DIR}/itkGDCM_ComplianceTestRGB_JPEG2000ICT.mha
+      rgb)
+
+itk_add_test(NAME itkGDCM_ComplianceTestRGB_JPEG2000RCT
+  COMMAND ITKIOGDCMTestDriver
+    --compare DATA{Baseline/US1_J2KR.mha}
+      ${ITK_TEST_OUTPUT_DIR}/itkGDCM_ComplianceTestRGB_JPEG2000RCT.mha
+    itkGDCMImageReadWriteTest
+      DATA{Input/US1_J2KR.dcm}
+      ${ITK_TEST_OUTPUT_DIR}/itkGDCM_ComplianceTestRGB_JPEG2000RCT.mha
       rgb)
 
 itk_add_test(NAME itkGDCMImageReadWriteTest_JPEGBaseline1
@@ -184,3 +204,36 @@ itk_add_test(NAME itkGDCMImageReadWriteTest_JPEGBaseline1
       DATA{Input/JPEGBaseline1DicomTest.dcm}
       ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageReadWriteTest_JPEGBaseline1.mha
       rgb)
+
+itk_add_test(NAME itkGDCMImageIOTest3_mono1
+  COMMAND ITKIOGDCMTestDriver
+    --ignoreInputInformation
+    --compare DATA{Baseline/itkGDCMImageIOTest3Baseline.mha}
+      ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest3_mono1.mha
+    itkGDCMImageReadWriteTest
+      DATA{Input/itkGDCMImageIOTest3_mono1.dcm}
+      ${ITK_TEST_OUTPUT_DIR}/itkGDCMImageIOTest3_mono1.mha
+      scalar
+  )
+
+function(AddComplianceTest fileName)
+  itk_add_test(NAME itkGDCM_ComplianceTestRGB_${fileName}
+    COMMAND ITKIOGDCMTestDriver
+      --compareIntensityTolerance 3
+      --compareCoordinateTolerance 0.001
+      --compare DATA{Baseline/Lily.png}
+        ${ITK_TEST_OUTPUT_DIR}/itkGDCM_ComplianceTestRGB_${fileName}.mha
+      itkGDCMImageReadWriteTest
+        DATA{Input/Lily/${fileName}.dcm}
+        ${ITK_TEST_OUTPUT_DIR}/itkGDCM_ComplianceTestRGB_${fileName}.mha
+        rgb)
+endfunction()
+
+AddComplianceTest(JPEG2000-YBR_RCT)
+AddComplianceTest(JPEGLS-RGB)
+AddComplianceTest(losslessJPEG-RGB)
+AddComplianceTest(lossyJPEG-YBR_FULL_422)
+AddComplianceTest(raw-RGB)
+AddComplianceTest(raw-YBR_FULL)
+AddComplianceTest(raw-YBR_FULL_422)
+AddComplianceTest(RLE-RGB)

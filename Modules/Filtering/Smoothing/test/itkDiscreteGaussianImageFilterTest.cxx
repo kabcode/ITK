@@ -20,6 +20,8 @@
 #include "itkDiscreteGaussianImageFilter.h"
 #include "itkNullImageToImageFilterDriver.hxx"
 #include "itkSimpleFilterWatcher.h"
+#include "itkTestingMacros.h"
+#include "itkConstantBoundaryCondition.h"
 
 int
 itkDiscreteGaussianImageFilterTest(int, char *[])
@@ -45,6 +47,25 @@ itkDiscreteGaussianImageFilterTest(int, char *[])
 
     array.Fill(0.04);
     filter->SetMaximumError(array.GetDataPointer());
+
+    // Set the value ofthe standard deviation of the Gaussian used for smoothing
+    FilterType::SigmaArrayType::ValueType sigmaValue = 1.0;
+    FilterType::SigmaArrayType            sigma;
+    sigma.Fill(sigmaValue);
+
+    filter->SetSigma(sigmaValue);
+    ITK_TEST_SET_GET_VALUE(sigmaValue, filter->GetSigma());
+
+    filter->SetSigmaArray(sigma);
+    ITK_TEST_SET_GET_VALUE(sigma, filter->GetSigmaArray());
+
+    // Set the boundary condition used by the filter
+    itk::ConstantBoundaryCondition<ImageType> constantBoundaryCondition;
+    filter->SetInputBoundaryCondition(&constantBoundaryCondition);
+    ITK_TEST_SET_GET_VALUE(&constantBoundaryCondition, filter->GetInputBoundaryCondition());
+
+    filter->SetRealBoundaryCondition(&constantBoundaryCondition);
+    ITK_TEST_SET_GET_VALUE(&constantBoundaryCondition, filter->GetRealBoundaryCondition());
 
     // set some parameters
     filter->SetVariance(1.0);
@@ -104,7 +125,7 @@ itkDiscreteGaussianImageFilterTest(int, char *[])
     test1.SetFilter(filter);
     test1.Execute();
   }
-  catch (itk::ExceptionObject & err)
+  catch (const itk::ExceptionObject & err)
   {
     (&err)->Print(std::cerr);
     return EXIT_FAILURE;

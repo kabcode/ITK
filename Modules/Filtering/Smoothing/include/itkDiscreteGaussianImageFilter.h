@@ -20,6 +20,7 @@
 
 #include "itkImageToImageFilter.h"
 #include "itkImage.h"
+#include "itkZeroFluxNeumannBoundaryCondition.h"
 
 namespace itk
 {
@@ -58,7 +59,7 @@ namespace itk
  * \endsphinx
  */
 
-template <typename TInputImage, typename TOutputImage>
+template <typename TInputImage, typename TOutputImage = TInputImage>
 class ITK_TEMPLATE_EXPORT DiscreteGaussianImageFilter : public ImageToImageFilter<TInputImage, TOutputImage>
 {
 public:
@@ -95,8 +96,22 @@ public:
    * of the two images is assumed to be the same. */
   static constexpr unsigned int ImageDimension = TOutputImage::ImageDimension;
 
+  /** Type of the pixel to use for intermediate results */
+  using RealOutputPixelType = typename NumericTraits<OutputPixelType>::RealType;
+  using RealOutputImageType = Image<OutputPixelType, ImageDimension>;
+  using RealOutputPixelValueType = typename NumericTraits<RealOutputPixelType>::ValueType;
+
+  /** Typedef to describe the boundary condition. */
+  using BoundaryConditionType = ImageBoundaryCondition<TInputImage>;
+  using InputBoundaryConditionPointerType = BoundaryConditionType *;
+  using InputDefaultBoundaryConditionType = ZeroFluxNeumannBoundaryCondition<TInputImage>;
+  using RealBoundaryConditionPointerType = ImageBoundaryCondition<RealOutputImageType> *;
+  using RealDefaultBoundaryConditionType = ZeroFluxNeumannBoundaryCondition<RealOutputImageType>;
+
   /** Typedef of double containers */
   using ArrayType = FixedArray<double, Self::ImageDimension>;
+  using SigmaArrayType = ArrayType;
+  using ScalarRealType = double;
 
   /** The variance for the discrete Gaussian kernel.  Sets the variance
    * independently for each dimension, but
@@ -125,6 +140,12 @@ public:
    * FilterDimensionality to 2. */
   itkGetConstMacro(FilterDimensionality, unsigned int);
   itkSetMacro(FilterDimensionality, unsigned int);
+
+  /** Set/get the boundary condition. */
+  itkSetMacro(InputBoundaryCondition, InputBoundaryConditionPointerType);
+  itkGetConstMacro(InputBoundaryCondition, InputBoundaryConditionPointerType);
+  itkSetMacro(RealBoundaryCondition, RealBoundaryConditionPointerType);
+  itkGetConstMacro(RealBoundaryCondition, RealBoundaryConditionPointerType);
 
   /** Convenience Set methods for setting all dimensional parameters
    *  to the same values. */
@@ -164,6 +185,46 @@ public:
       dv[i] = v[i];
     }
     this->SetVariance(dv);
+  }
+
+  /** Set the standard deviation of the Gaussian used for smoothing.
+   * Sigma is measured in the units of image spacing. You may use the method
+   * SetSigma to set the same value across each axis or use the method
+   * SetSigmaArray if you need different values along each axis. */
+  void
+  SetSigmaArray(const ArrayType & sigmas)
+  {
+    ArrayType variance;
+    for (unsigned int i = 0; i < ImageDimension; i++)
+    {
+      variance[i] = sigmas[i] * sigmas[i];
+    }
+    this->SetVariance(variance);
+  }
+  void
+  SetSigma(double sigma)
+  {
+    this->SetVariance(sigma * sigma);
+  }
+
+  /** Get the Sigma value. */
+  ArrayType
+  GetSigmaArray() const
+  {
+    ArrayType sigmas;
+    for (unsigned int i = 0; i < ImageDimension; i++)
+    {
+      sigmas[i] = std::sqrt(m_Variance[i]);
+    }
+    return sigmas;
+  }
+
+  /** Get the Sigma scalar. If the Sigma is anisotropic, we will just
+   * return the Sigma along the first dimension. */
+  double
+  GetSigma() const
+  {
+    return std::sqrt(m_Variance[0]);
   }
 
   void
@@ -249,6 +310,8 @@ protected:
     m_MaximumKernelWidth = 32;
     m_UseImageSpacing = true;
     m_FilterDimensionality = ImageDimension;
+    m_InputBoundaryCondition = &m_InputDefaultBoundaryCondition;
+    m_RealBoundaryCondition = &m_RealDefaultBoundaryCondition;
   }
 
   ~DiscreteGaussianImageFilter() override = default;
@@ -282,6 +345,19 @@ private:
 
   /** Flag to indicate whether to use image spacing */
   bool m_UseImageSpacing;
+
+  /** Pointer to a persistent boundary condition object used
+   ** for the image iterator. */
+  InputBoundaryConditionPointerType m_InputBoundaryCondition;
+
+  /** Default boundary condition */
+  InputDefaultBoundaryConditionType m_InputDefaultBoundaryCondition;
+
+  /** Boundary condition use for the intermediate filters */
+  RealBoundaryConditionPointerType m_RealBoundaryCondition;
+
+  /** Default boundary condition use for the intermediate filters */
+  RealDefaultBoundaryConditionType m_RealDefaultBoundaryCondition;
 };
 } // end namespace itk
 

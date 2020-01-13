@@ -145,7 +145,7 @@ itkSPSAOptimizerTest(int, char *[])
   {
     itkOptimizer->GuessParameters(50, 70.0);
   }
-  catch (itk::ExceptionObject & e)
+  catch (const itk::ExceptionObject & e)
   {
     std::cout << "Exception thrown ! " << std::endl;
     std::cout << "An error occurred during Guessing Parameters" << std::endl;
@@ -160,7 +160,7 @@ itkSPSAOptimizerTest(int, char *[])
   {
     itkOptimizer->StartOptimization();
   }
-  catch (itk::ExceptionObject & e)
+  catch (const itk::ExceptionObject & e)
   {
     std::cout << "Exception thrown ! " << std::endl;
     std::cout << "An error occurred during Optimization" << std::endl;
@@ -191,11 +191,11 @@ itkSPSAOptimizerTest(int, char *[])
     if (itk::Math::abs(finalPosition[j] - trueParameters[j]) > 0.01)
       pass = false;
   }
-  if (itkOptimizer->GetStopCondition() == itk::SPSAOptimizer::StopConditionType::Unknown)
+  if (itkOptimizer->GetStopCondition() == itk::SPSAOptimizer::StopConditionEnum::Unknown)
   {
     pass = false;
   }
-  if (itkOptimizer->GetStopCondition() == itk::SPSAOptimizer::StopConditionType::MetricError)
+  if (itkOptimizer->GetStopCondition() == itk::SPSAOptimizer::StopConditionEnum::MetricError)
   {
     pass = false;
   }

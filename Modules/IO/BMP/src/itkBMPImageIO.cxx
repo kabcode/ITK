@@ -70,7 +70,6 @@ BMPImageIO::CanReadFile(const char * filename)
   if (!extensionFound)
   {
     itkDebugMacro(<< "The filename extension is not recognized");
-    return false;
   }
 
   // Now check the content
@@ -90,7 +89,6 @@ BMPImageIO::CanReadFile(const char * filename)
 
   if ((magic_number1 != 'B') || (magic_number2 != 'M'))
   {
-    std::cerr << "BMPImageIO : Magic Number Fails = " << magic_number1 << " : " << magic_number2 << std::endl;
     inputStream.close();
     return false;
   }

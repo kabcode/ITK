@@ -83,8 +83,8 @@ itkRecursiveGaussianImageFiltersOnTensorsTest(int, char *[])
   FilterType::Pointer filterY = FilterType::New();
   filterX->SetDirection(0); // 0 --> X direction
   filterY->SetDirection(1); // 1 --> Y direction
-  filterX->SetOrder(itk::EnumGaussianOrderType::ZeroOrder);
-  filterY->SetOrder(itk::EnumGaussianOrderType::ZeroOrder);
+  filterX->SetOrder(itk::GaussianOrderEnum::ZeroOrder);
+  filterY->SetOrder(itk::GaussianOrderEnum::ZeroOrder);
   filterX->SetNormalizeAcrossScale(false);
   filterY->SetNormalizeAcrossScale(false);
   filterX->SetInput(inputImage);
@@ -95,7 +95,7 @@ itkRecursiveGaussianImageFiltersOnTensorsTest(int, char *[])
   {
     filterY->Update();
   }
-  catch (itk::ExceptionObject & err)
+  catch (const itk::ExceptionObject & err)
   {
     std::cout << "ExceptionObject caught a !" << std::endl;
     std::cout << err << std::endl;

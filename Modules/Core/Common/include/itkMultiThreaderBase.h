@@ -110,7 +110,7 @@ public:
 
   /** Currently supported types of multi-threader implementations.
    * Last will change with additional implementations. */
-  enum ThreaderType
+  enum class ThreaderEnum : int8_t
   {
     Platform = 0,
     First = Platform,
@@ -119,27 +119,30 @@ public:
     Last = TBB,
     Unknown = -1
   };
+#if !defined(ITK_LEGACY_REMOVE)
+  using ThreaderType = ThreaderEnum;
+#endif
 
   /** Convert a threader name into its enum type. */
-  static ThreaderType
+  static ThreaderEnum
   ThreaderTypeFromString(std::string threaderString);
 
   /** Convert a threader enum type into a string for displaying or logging. */
   static std::string
-  ThreaderTypeToString(ThreaderType threader)
+  ThreaderTypeToString(ThreaderEnum threader)
   {
     switch (threader)
     {
-      case ThreaderType::Platform:
+      case ThreaderEnum::Platform:
         return "Platform";
         break;
-      case ThreaderType::Pool:
+      case ThreaderEnum::Pool:
         return "Pool";
         break;
-      case ThreaderType::TBB:
+      case ThreaderEnum::TBB:
         return "TBB";
         break;
-      case ThreaderType::Unknown:
+      case ThreaderEnum::Unknown:
       default:
         return "Unknown";
         break;
@@ -158,8 +161,8 @@ public:
    * If the SetGlobalDefaultThreaderType API is ever used by the developer,
    * the developer's choice is respected over the environment variables. */
   static void
-  SetGlobalDefaultThreader(ThreaderType threaderType);
-  static ThreaderType
+  SetGlobalDefaultThreader(ThreaderEnum threaderType);
+  static ThreaderEnum
   GetGlobalDefaultThreader();
 
   /** Set/Get the value which is used to initialize the NumberOfThreads in the
@@ -237,7 +240,7 @@ ITK_GCC_PRAGMA_DIAG_POP()
     ThreadIdType       NumberOfWorkUnits;
     void *             UserData;
     ThreadFunctionType ThreadFunction;
-    enum
+    enum class ThreadExitCodeType : uint8_t
     {
       SUCCESS,
       ITK_EXCEPTION,
@@ -245,6 +248,14 @@ ITK_GCC_PRAGMA_DIAG_POP()
       STD_EXCEPTION,
       UNKNOWN
     } ThreadExitCode;
+#if !defined(ITK_LEGACY_REMOVE)
+    static constexpr ThreadExitCodeType SUCCESS = ThreadExitCodeType::SUCCESS;
+    static constexpr ThreadExitCodeType ITK_EXCEPTION = ThreadExitCodeType::ITK_EXCEPTION;
+    static constexpr ThreadExitCodeType ITK_PROCESS_ABORTED_EXCEPTION =
+      ThreadExitCodeType::ITK_PROCESS_ABORTED_EXCEPTION;
+    static constexpr ThreadExitCodeType STD_EXCEPTION = ThreadExitCodeType::STD_EXCEPTION;
+    static constexpr ThreadExitCodeType UNKNOWN = ThreadExitCodeType::UNKNOWN;
+#endif
   };
 
   /** Execute the SingleMethod (as define by SetSingleMethod) using
@@ -451,7 +462,7 @@ private:
 };
 
 ITKCommon_EXPORT std::ostream &
-                 operator<<(std::ostream & os, const MultiThreaderBase::ThreaderType & threader);
+                 operator<<(std::ostream & os, const MultiThreaderBase::ThreaderEnum & threader);
 
 } // end namespace itk
 #endif

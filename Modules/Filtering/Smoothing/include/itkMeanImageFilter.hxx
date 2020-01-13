@@ -19,12 +19,13 @@
 #define itkMeanImageFilter_hxx
 #include "itkMeanImageFilter.h"
 
-#include "itkConstNeighborhoodIterator.h"
-#include "itkNeighborhoodInnerProduct.h"
-#include "itkImageRegionIterator.h"
+#include "itkBufferedImageNeighborhoodPixelAccessPolicy.h"
+#include "itkImageNeighborhoodOffsets.h"
+#include "itkImageRegionRange.h"
+#include "itkIndexRange.h"
 #include "itkNeighborhoodAlgorithm.h"
 #include "itkOffset.h"
-#include "itkProgressReporter.h"
+#include "itkShapedImageNeighborhoodRange.h"
 
 namespace itk
 {
@@ -39,49 +40,62 @@ void
 MeanImageFilter<TInputImage, TOutputImage>::DynamicThreadedGenerateData(
   const OutputImageRegionType & outputRegionForThread)
 {
-  unsigned int i;
-
-  ZeroFluxNeumannBoundaryCondition<InputImageType> nbc;
-
-  ConstNeighborhoodIterator<InputImageType> bit;
-  ImageRegionIterator<OutputImageType>      it;
-
   typename OutputImageType::Pointer     output = this->GetOutput();
   typename InputImageType::ConstPointer input = this->GetInput();
 
-  // Find the data-set boundary "faces"
-  typename NeighborhoodAlgorithm::ImageBoundaryFacesCalculator<InputImageType>::FaceListType faceList;
-  NeighborhoodAlgorithm::ImageBoundaryFacesCalculator<InputImageType>                        bC;
-  faceList = bC(input, outputRegionForThread, this->GetRadius());
+  const auto radius = this->GetRadius();
 
-  typename NeighborhoodAlgorithm::ImageBoundaryFacesCalculator<InputImageType>::FaceListType::iterator fit;
+  // Find the data-set boundary "faces" and the center non-boundary subregion.
+  const auto calculatorResult =
+    NeighborhoodAlgorithm::ImageBoundaryFacesCalculator<InputImageType>::Compute(*input, outputRegionForThread, radius);
 
-  InputRealType sum;
+  using namespace Experimental;
+  const auto neighborhoodOffsets = GenerateRectangularImageNeighborhoodOffsets<InputImageDimension>(radius);
 
-  // Process each of the boundary faces.  These are N-d regions which border
+  // Process the non-boundary subregion, using a faster pixel access policy without boundary extrapolation.
+  GenerateDataInSubregion<BufferedImageNeighborhoodPixelAccessPolicy<InputImageType>>(
+    *input, *output, calculatorResult.GetNonBoundaryRegion(), neighborhoodOffsets);
+
+  // Process each of the boundary faces. These are N-d regions which border
   // the edge of the buffer.
-  for (fit = faceList.begin(); fit != faceList.end(); ++fit)
+  for (const auto & boundaryFace : calculatorResult.GetBoundaryFaces())
   {
-    bit = ConstNeighborhoodIterator<InputImageType>(this->GetRadius(), input, *fit);
-    unsigned int neighborhoodSize = bit.Size();
-    it = ImageRegionIterator<OutputImageType>(output, *fit);
-    bit.OverrideBoundaryCondition(&nbc);
-    bit.GoToBegin();
+    GenerateDataInSubregion<ZeroFluxNeumannImageNeighborhoodPixelAccessPolicy<InputImageType>>(
+      *input, *output, boundaryFace, neighborhoodOffsets);
+  }
+}
 
-    while (!bit.IsAtEnd())
+
+template <typename TInputImage, typename TOutputImage>
+template <typename TPixelAccessPolicy>
+void
+MeanImageFilter<TInputImage, TOutputImage>::GenerateDataInSubregion(
+  const TInputImage &                              inputImage,
+  TOutputImage &                                   outputImage,
+  const ImageRegion<InputImageDimension> &         imageRegion,
+  const std::vector<Offset<InputImageDimension>> & neighborhoodOffsets)
+{
+  const auto neighborhoodSize = static_cast<double>(neighborhoodOffsets.size());
+
+  using namespace Experimental;
+  auto neighborhoodRange = ShapedImageNeighborhoodRange<const InputImageType, TPixelAccessPolicy>(
+    inputImage, Index<InputImageDimension>(), neighborhoodOffsets);
+  auto outputIterator = ImageRegionRange<OutputImageType>(outputImage, imageRegion).begin();
+
+  for (const auto & index : ImageRegionIndexRange<InputImageDimension>(imageRegion))
+  {
+    neighborhoodRange.SetLocation(index);
+
+    auto sum = NumericTraits<InputRealType>::ZeroValue();
+
+    for (const InputPixelType pixelValue : neighborhoodRange)
     {
-      sum = NumericTraits<InputRealType>::ZeroValue();
-      for (i = 0; i < neighborhoodSize; ++i)
-      {
-        sum += static_cast<InputRealType>(bit.GetPixel(i));
-      }
-
-      // get the mean value
-      it.Set(static_cast<OutputPixelType>(sum / double(neighborhoodSize)));
-
-      ++bit;
-      ++it;
+      sum += static_cast<InputRealType>(pixelValue);
     }
+
+    // get the mean value
+    *outputIterator = static_cast<typename OutputImageType::PixelType>(sum / neighborhoodSize);
+    ++outputIterator;
   }
 }
 } // end namespace itk

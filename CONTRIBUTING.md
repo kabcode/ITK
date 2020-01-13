@@ -218,7 +218,17 @@ When a topic is submitted, it is tested across the three major platforms
 before being merged thanks to the [Azure DevOps Pipelines CI
 system](https://azure.microsoft.com/en-ca/services/devops/pipelines/),
 as well as the [CDash GitHub
-Checks](https://github.com/InsightSoftwareConsortium/ITKGitHubCDashStatus).
+Checks](https://github.com/InsightSoftwareConsortium/ITKGitHubCDashStatus),
+and [ITK Coding Style
+check](https://github.com/InsightSoftwareConsortium/ITKClangFormatLinterAction).
+
+If a platform configuration test failure appears to be a false positive, the
+test can be re-executed by adding a comment to the pull request with the
+content `/azp run <ConfigurationName>`. For example:
+
+```
+    /azp run ITK.Linux
+```
 
 After the topic has been merged, it is tested on many
 platforms and configurations on the [nightly
@@ -331,6 +341,7 @@ branch (*warning*: you could lose commits).
 More Information
 ----------------
 
+- [ITK Software Guide, Book 1, Part III: Development Guidelines](https://itk.org/ItkSoftwareGuide.pdf)
 - General [Git Help]
 - [GitHub flow guide]
 - [ITK Git Cheatsheet]

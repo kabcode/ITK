@@ -9,29 +9,19 @@
 #ifdef _MSC_VER
 #  include <vcl_msvc_warnings.h>
 #endif
-#include <vnl/vnl_math.h>  // for vnl_math::isfinite
+#include "vnl_math.h"  // for vnl_math::isfinite
 
 
 //------------------------------------------------------------
 template <typename T>
-vnl_vector_ref<T>::vnl_vector_ref(unsigned n, T *space) : vnl_vector<T>()
-{
-  Base::data = space;
-  Base::num_elmts = n;
-}
+vnl_vector_ref<T>::vnl_vector_ref(size_t n, T * space)
+ : vnl_vector<T>(n, space, false)
+{}
 
 template <typename T>
-vnl_vector_ref<T>::vnl_vector_ref(vnl_vector_ref<T> const& v) : vnl_vector<T>()
-{
-  Base::data = const_cast<T*>(v.data_block()); // const incorrect!
-  Base::num_elmts = v.size();
-}
-
-template <typename T>
-vnl_vector_ref<T>::~vnl_vector_ref()
-{
-  Base::data = nullptr;
-}
+vnl_vector_ref<T>::vnl_vector_ref(const vnl_vector_ref<T> & v)
+  : vnl_vector<T>(v.size(), const_cast<T *>(v.data_block()),false)
+{}
 
 template <typename T>
 vnl_vector_ref<T>& vnl_vector_ref<T>::non_const()

@@ -1,21 +1,6 @@
 ###############################################################################
-# configure python (find PythonInterp first, as of cmake 3.1)
-find_package(PythonInterp)
-find_package(PythonLibs)
 
-# Check for supported python versions
-if(PYTHON_VERSION_STRING VERSION_LESS 3.5)
-  message(WARNING "Python versions less than 3.5 are not supported. Python version: \"${PYTHON_VERSION_STRING}\".")
-endif()
-
-# check for version mismatch.
-if(PYTHONLIBS_FOUND AND PYTHONINTERP_FOUND
-    AND NOT(PYTHON_VERSION_STRING VERSION_EQUAL PYTHONLIBS_VERSION_STRING))
-  message(WARNING "Python executable (\"${PYTHON_VERSION_STRING}\") and library (\"${PYTHONLIBS_VERSION_STRING}\") version mismatch.")
-endif()
-
-mark_as_advanced(PYTHON_EXECUTABLE)
-include_directories("${PYTHON_INCLUDE_DIRS}")
+include_directories("${Python3_INCLUDE_DIRS}")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -36,15 +21,15 @@ file(MAKE_DIRECTORY ${WRAPPER_MASTER_INDEX_OUTPUT_DIR}/python)
 
 ###############################################################################
 # Configure Python wrapping installation
-if(PYTHON_EXECUTABLE AND NOT PY_SITE_PACKAGES_PATH)
+if(Python3_EXECUTABLE AND NOT PY_SITE_PACKAGES_PATH)
   set(python_check "from __future__ import print_function\ntry:\n    import distutils.sysconfig\n    print(distutils.sysconfig.get_python_lib(plat_specific=1, prefix=''))\nexcept:\n    pass")
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/detect_site_package_path.py ${python_check})
-  execute_process(COMMAND "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_BINARY_DIR}/detect_site_package_path.py"
+  execute_process(COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_BINARY_DIR}/detect_site_package_path.py"
     OUTPUT_VARIABLE py_spp
     ERROR_VARIABLE py_spp
   )
 
-  execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "from __future__ import print_function\nimport sys\nprint(sys.prefix)"
+  execute_process(COMMAND "${Python3_EXECUTABLE}" -c "from __future__ import print_function\nimport sys\nprint(sys.prefix)"
     OUTPUT_VARIABLE py_prefix
     ERROR_VARIABLE py_prefix
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -206,7 +191,6 @@ if(NOT EXTERNAL_WRAP_ITK_PROJECT)
     )
   WRAP_ITK_PYTHON_BINDINGS_INSTALL(/itk "ITKCommon" ${init_file})
   set(python_modules ${ITK_WRAP_PYTHON_INSTALL_FILES})
-  list(REMOVE_AT python_modules 0)
   WRAP_ITK_PYTHON_BINDINGS_INSTALL(/ "ITKCommon" ${python_modules})
 endif()
 
@@ -249,7 +233,7 @@ macro(itk_wrap_module_python library_name)
   set(ITK_WRAP_PYTHON_LIBRARY_CALLS )
   set(ITK_WRAP_PYTHON_CXX_FILES )
   if(MSVC)
-    get_filename_component(python_library_directory ${PYTHON_LIBRARY} DIRECTORY)
+    get_filename_component(python_library_directory ${Python3_LIBRARY} DIRECTORY)
     # It should use the following code inside `itk_end_wrap_module_python` but
     # `target_link_directories()` was only added to CMake 3.13.
     # target_link_directories(${lib} PUBLIC ${python_library_directory})
@@ -888,9 +872,9 @@ macro(itk_wrap_simple_type_python wrap_class swig_name)
     ADD_PYTHON_VARIABLE_LENGTH_SEQ_TYPEMAP("${swig_name}" "${template_params}")
   endif()
 
-  if("${swig_name}" STREQUAL "itkTransformBase")
+  if("${cpp_name}" STREQUAL "itk::TransformBaseTemplate" AND NOT "${ext_def}" MATCHES "Pointer")
     set(ITK_WRAP_PYTHON_SWIG_EXT "${ITK_WRAP_PYTHON_SWIG_EXT}%template(list${swig_name}_Pointer) std::list< ${swig_name}_Pointer >;\n")
-    ADD_PYTHON_CONFIG_TEMPLATE("list" "std::list" "list${swig_name}_Pointer" "itk::TransformBase")
+    ADD_PYTHON_CONFIG_TEMPLATE("list" "std::list" "list${swig_name}_Pointer" "${cpp_name}< ${template_params}>")
   endif()
 
   if("${cpp_name}" STREQUAL "itk::SpatialObjectPoint")

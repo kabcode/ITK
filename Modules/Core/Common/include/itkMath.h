@@ -28,6 +28,7 @@
 #ifndef itkMath_h
 #define itkMath_h
 
+#include <cmath>
 #include "itkMathDetail.h"
 #include "itkConceptChecking.h"
 #include <vnl/vnl_math.h>
@@ -280,8 +281,8 @@ FloatAddULP(T x, typename Detail::FloatIEEE<T>::IntType ulps)
  *
  * The implementation is based off the explanation in the white papers:
  *
- * - http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
- * - http://randomascii.wordpress.com/category/floating-point/
+ * - https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+ * - https://randomascii.wordpress.com/category/floating-point/
  *
  * This function is not a cure-all, and reading those articles is important
  * to understand its appropriate use in the context of ULPs, zeros, subnormals,
@@ -318,25 +319,21 @@ FloatAlmostEqual(T                                        x1,
     return true;
   }
 
-#if defined(__APPLE__) && (__clang_major__ == 3) && (__clang_minor__ == 0) && defined(NDEBUG) && defined(__x86_64__)
-  Detail::FloatIEEE<T> x1f(x1);
-  Detail::FloatIEEE<T> x2f(x2);
-  double               x1fAsULP = static_cast<double>(x1f.AsULP());
-  double               x2fAsULP = static_cast<double>(x2f.AsULP());
-  double               ulps = x1fAsULP - x2fAsULP;
-  if (ulps < 0)
+  // This check for different signs is necessary for several reasons, see the blog link above.
+  // Subtracting the signed-magnitude representation of floats using twos-complement
+  // math isn't particularly meaningful, and the subtraction would produce a 33-bit
+  // result and overflow an int.
+  if (std::signbit(x1) != std::signbit(x2))
   {
-    ulps = -ulps;
+    return false;
   }
-  return ulps <= static_cast<double>(maxUlps);
-#else
+
   typename Detail::FloatIEEE<T>::IntType ulps = FloatDifferenceULP(x1, x2);
   if (ulps < 0)
   {
     ulps = -ulps;
   }
   return ulps <= maxUlps;
-#endif
 }
 
 // The following code cannot be moved to the itkMathDetail.h file without introducing circular dependencies
@@ -761,6 +758,58 @@ ITKCommon_EXPORT unsigned long
 GreatestPrimeFactor(unsigned long n);
 ITKCommon_EXPORT unsigned long long
 GreatestPrimeFactor(unsigned long long n);
+
+// C++11 does not guarantee that assert can be used in constexpr
+// functions. This is a work-around for GCC 4.8, 4.9. Originating
+// from Andrzej's C++ blog:
+//  https://akrzemi1.wordpress.com/2017/05/18/asserts-in-constexpr-functions/
+#if defined NDEBUG
+#  define ITK_X_ASSERT(CHECK) void(0)
+#else
+#  define ITK_X_ASSERT(CHECK) ((CHECK) ? void(0) : [] { assert(!#CHECK); }())
+#endif
+
+/**  Returns `a * b`. Numeric overflow triggers a compilation error in
+ * "constexpr context" and a debug assert failure at run-time.
+ */
+template <typename TReturnType = std::uintmax_t>
+constexpr TReturnType
+UnsignedProduct(const std::uintmax_t a, const std::uintmax_t b) ITK_NOEXCEPT
+{
+  static_assert(std::is_unsigned<TReturnType>::value, "UnsignedProduct only supports unsigned return types");
+
+  // Note that numeric overflow is not "undefined behavior", for unsigned numbers.
+  // This function checks if the result of a*b is mathematically correct.
+  return (a == 0) || (b == 0) ||
+             (((static_cast<TReturnType>(a * b) / a) == b) && ((static_cast<TReturnType>(a * b) / b) == a))
+           ? static_cast<TReturnType>(a * b)
+           : (ITK_X_ASSERT(!"UnsignedProduct overflow!"), 0);
+}
+
+
+/** Calculates base ^ exponent. Numeric overflow triggers a compilation error in
+ * "constexpr context" and a debug assert failure at run-time. Otherwise equivalent to
+ * C++11 `static_cast<std::uintmax_t>(std::pow(base, exponent))`
+ *
+ * \note `UnsignedPower(0, 0)` is not supported, as zero to the power of zero has
+ * no agreed-upon value: https://en.wikipedia.org/wiki/Zero_to_the_power_of_zero
+ */
+template <typename TReturnType = std::uintmax_t>
+constexpr TReturnType
+UnsignedPower(const std::uintmax_t base, const std::uintmax_t exponent) ITK_NOEXCEPT
+{
+  static_assert(std::is_unsigned<TReturnType>::value, "UnsignedPower only supports unsigned return types");
+
+  // Uses recursive function calls because C++11 does not support other ways of
+  // iterations for a constexpr function.
+  return (exponent == 0)
+           ? (ITK_X_ASSERT(base > 0), 1)
+           : (exponent == 1) ? base
+                             : UnsignedProduct<TReturnType>(UnsignedPower<TReturnType>(base, exponent / 2),
+                                                            UnsignedPower<TReturnType>(base, (exponent + 1) / 2));
+}
+
+#undef ITK_X_ASSERT
 
 
 /*==========================================

@@ -74,6 +74,23 @@ template <typename TInputImage,
           typename TInterpolatorPrecisionType,
           typename TTransformPrecisionType>
 void
+ResampleImageFilter<TInputImage, TOutputImage, TInterpolatorPrecisionType, TTransformPrecisionType>::
+  VerifyPreconditions() ITKv5_CONST
+{
+  this->Superclass::VerifyPreconditions();
+  const ReferenceImageBaseType * const referenceImage = this->GetReferenceImage();
+  if (this->m_Size[0] == 0 && referenceImage && !m_UseReferenceImage)
+  {
+    itkExceptionMacro("Output image size is zero in all dimensions.  Consider using SetUseReferenceImageOn()."
+                      "to define the resample output from the ReferenceImage.");
+  }
+}
+
+template <typename TInputImage,
+          typename TOutputImage,
+          typename TInterpolatorPrecisionType,
+          typename TTransformPrecisionType>
+void
 ResampleImageFilter<TInputImage, TOutputImage, TInterpolatorPrecisionType, TTransformPrecisionType>::SetOutputSpacing(
   const double * spacing)
 {
@@ -186,7 +203,7 @@ ResampleImageFilter<TInputImage, TOutputImage, TInterpolatorPrecisionType, TTran
   // can be used if the transformation is linear. Transform respond
   // to the IsLinear() call.
   if (!isSpecialCoordinatesImage &&
-      this->GetTransform()->GetTransformCategory() == TransformType::TransformCategoryType::Linear)
+      this->GetTransform()->GetTransformCategory() == TransformType::TransformCategoryEnum::Linear)
   {
     this->LinearThreadedGenerateData(outputRegionForThread);
     return;
@@ -525,7 +542,7 @@ ResampleImageFilter<TInputImage, TOutputImage, TInterpolatorPrecisionType, TTran
   // Check whether we can use upstream streaming for resampling. Upstream streaming
   // can be used if the transformation is linear. Transform respond
   // to the IsLinear() call.
-  if (!isSpecialCoordinatesImage && transform->GetTransformCategory() == TransformType::TransformCategoryType::Linear)
+  if (!isSpecialCoordinatesImage && transform->GetTransformCategory() == TransformType::TransformCategoryEnum::Linear)
   {
     typename TInputImage::RegionType inputRequestedRegion;
     inputRequestedRegion = ImageAlgorithm::EnlargeRegionOverBox(output->GetRequestedRegion(), output, input, transform);
@@ -575,7 +592,7 @@ ResampleImageFilter<TInputImage, TOutputImage, TInterpolatorPrecisionType, TTran
   // Get pointers to the input and output
   OutputImageType * outputPtr = this->GetOutput();
 
-  const ReferenceImageBaseType * referenceImage = this->GetReferenceImage();
+  const ReferenceImageBaseType * const referenceImage = this->GetReferenceImage();
 
   // Set the size of the output region
   if (m_UseReferenceImage && referenceImage)

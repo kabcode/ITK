@@ -40,11 +40,11 @@
 
 namespace itk
 {
-/** \class MeshClassCellsAllocationMethodType
+/** \class MeshClassCellsAllocationMethodEnum
  * \ingroup ITKMesh
  * Enum defining the possible methods used to allocate memory for
  * the Cells */
-enum class MeshClassCellsAllocationMethodType : uint8_t
+enum class MeshClassCellsAllocationMethodEnum : uint8_t
 {
   CellsAllocationMethodUndefined,
   CellsAllocatedAsStaticArray,
@@ -150,8 +150,8 @@ public:
   static constexpr unsigned int MaxTopologicalDimension = TMeshTraits::MaxTopologicalDimension;
 
   /** Enables backwards compatibility for enum values */
-  using CellsAllocationMethodType = MeshClassCellsAllocationMethodType;
-#if !defined(ITK_LEGACY_REMOVE) || defined(ITK_WRAPPING) /* castxml 'enum class' workaround */
+  using CellsAllocationMethodType = MeshClassCellsAllocationMethodEnum;
+#if !defined(ITK_LEGACY_REMOVE)
   // We need to expose the enum values at the class level
   // for backwards compatibility
   static constexpr CellsAllocationMethodType CellsAllocationMethodUndefined =
@@ -359,6 +359,12 @@ public:
   const CellDataContainer *
   GetCellData() const;
 
+  /** Delete entries in m_CellDataContainer which do not have a corresponding
+   * entry in m_CellsContainer.
+   */
+  void
+  DeleteUnusedCellData();
+
 #if !defined(ITK_WRAPPING_PARSER)
   /**
    * Set/get the BoundaryAssignmentsContainer for a given dimension.
@@ -504,7 +510,7 @@ private:
 
 /** Define how to print enumeration */
 extern ITKMesh_EXPORT std::ostream &
-                      operator<<(std::ostream & out, const MeshClassCellsAllocationMethodType value);
+                      operator<<(std::ostream & out, const MeshClassCellsAllocationMethodEnum value);
 } // end namespace itk
 
 #ifndef ITK_MANUAL_INSTANTIATION

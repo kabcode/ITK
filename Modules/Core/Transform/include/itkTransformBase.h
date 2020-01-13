@@ -123,7 +123,7 @@ public:
   virtual std::string
   GetTransformTypeAsString() const = 0;
 
-  enum class TransformCategoryType : uint8_t
+  enum class TransformCategoryEnum : uint8_t
   {
     UnknownTransformCategory = 0,
     Linear = 1,
@@ -132,19 +132,22 @@ public:
     DisplacementField = 4,
     VelocityField = 5
   };
-#if !defined(ITK_LEGACY_REMOVE) || defined(ITK_WRAPPING) /* castxml 'enum class' workaround */
+#if !defined(ITK_LEGACY_REMOVE)
   // We need to expose the enum values at the class level
   // for backwards compatibility
-  static constexpr TransformCategoryType UnknownTransformCategory = TransformCategoryType::UnknownTransformCategory;
-  static constexpr TransformCategoryType Linear = TransformCategoryType::Linear;
-  static constexpr TransformCategoryType BSpline = TransformCategoryType::BSpline;
-  static constexpr TransformCategoryType Spline = TransformCategoryType::Spline;
-  static constexpr TransformCategoryType DisplacementField = TransformCategoryType::DisplacementField;
-  static constexpr TransformCategoryType VelocityField = TransformCategoryType::VelocityField;
+  static constexpr TransformCategoryEnum UnknownTransformCategory = TransformCategoryEnum::UnknownTransformCategory;
+  static constexpr TransformCategoryEnum Linear = TransformCategoryEnum::Linear;
+  static constexpr TransformCategoryEnum BSpline = TransformCategoryEnum::BSpline;
+  static constexpr TransformCategoryEnum Spline = TransformCategoryEnum::Spline;
+  static constexpr TransformCategoryEnum DisplacementField = TransformCategoryEnum::DisplacementField;
+  static constexpr TransformCategoryEnum VelocityField = TransformCategoryEnum::VelocityField;
+
+  // Preserve old type name for backwards compatibility
+  using TransformCategoryType = TransformCategoryEnum;
 #endif
 
   /** Get transform category */
-  virtual TransformCategoryType
+  virtual TransformCategoryEnum
   GetTransformCategory() const = 0;
 
 protected:
@@ -167,9 +170,9 @@ using TransformBase = TransformBaseTemplate<double>;
 
 // Define how to print enumeration
 extern ITKTransform_EXPORT std::ostream &
-                           operator<<(std::ostream & out, const typename TransformBaseTemplate<double>::TransformCategoryType value);
+                           operator<<(std::ostream & out, const typename TransformBaseTemplate<double>::TransformCategoryEnum value);
 extern ITKTransform_EXPORT std::ostream &
-                           operator<<(std::ostream & out, const typename TransformBaseTemplate<float>::TransformCategoryType value);
+                           operator<<(std::ostream & out, const typename TransformBaseTemplate<float>::TransformCategoryEnum value);
 } // end namespace itk
 
 #endif

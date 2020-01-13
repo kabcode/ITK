@@ -7,6 +7,7 @@ ITK: The Insight Toolkit
 [![PyPI](https://img.shields.io/pypi/v/itk.svg)](https://pypi.python.org/pypi/itk)
 [![Wheels](https://img.shields.io/pypi/wheel/itk.svg)](https://pypi.org/project/itk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/InsightSoftwareConsortium/ITK/blob/master/LICENSE)
+[![DOI](https://zenodo.org/badge/800928.svg)](https://zenodo.org/badge/latestdoi/800928)
 
 | | C++ | Python |
 |:------:|:--------:|:--------:|
@@ -19,12 +20,12 @@ Links
 -----
 
 * [Homepage](https://itk.org)
-* [Download](https://itk.org/ITK/resources/software.html)
+* [Download](https://itk.org/download/)
 * [Discussion](https://discourse.itk.org/)
-* [Software Guide](https://itk.org/ITKSoftwareGuide/html/)
-* [Help](https://itk.org/ITK/help/help.html)
+* [Software Guide](https://itk.org/ItkSoftwareGuide.pdf)
+* [Help](https://itk.org/resources/)
 * [Examples](https://itk.org/ITKExamples/)
-* [Issue tracking](http://issues.itk.org/)
+* [Issue tracking](https://github.com/InsightSoftwareConsortium/ITK/issues)
 * [Submit a patch](CONTRIBUTING.md)
 
 

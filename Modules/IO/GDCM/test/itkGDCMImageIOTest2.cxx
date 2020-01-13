@@ -45,7 +45,7 @@ itkGDCMImageIOTest2(int argc, char * argv[])
   {
     reader->Update();
   }
-  catch (itk::ExceptionObject & e)
+  catch (const itk::ExceptionObject & e)
   {
     std::cerr << "exception in file writer " << std::endl;
     std::cerr << e << std::endl;
@@ -117,7 +117,7 @@ itkGDCMImageIOTest2(int argc, char * argv[])
 
   // Save as JPEG 2000 Lossless
   // Explicitely specify which compression type to use
-  dicomIO->SetCompressionType(itk::GDCMImageIO::TCompressionType::JPEG2000);
+  dicomIO->SetCompressionType(itk::GDCMImageIO::CompressionEnum::JPEG2000);
   // Request compression of the ImageIO
   writer->UseCompressionOn();
   writer->SetFileName(output_j2k.c_str());
@@ -125,7 +125,7 @@ itkGDCMImageIOTest2(int argc, char * argv[])
   {
     writer->Update();
   }
-  catch (itk::ExceptionObject & e)
+  catch (const itk::ExceptionObject & e)
   {
     std::cerr << "exception in file writer " << std::endl;
     std::cerr << e << std::endl;
@@ -133,13 +133,13 @@ itkGDCMImageIOTest2(int argc, char * argv[])
   }
 
   // Save as JPEG Lossless
-  dicomIO->SetCompressionType(itk::GDCMImageIO::TCompressionType::JPEG);
+  dicomIO->SetCompressionType(itk::GDCMImageIO::CompressionEnum::JPEG);
   writer->SetFileName(output_jpll.c_str());
   try
   {
     writer->Update();
   }
-  catch (itk::ExceptionObject & e)
+  catch (const itk::ExceptionObject & e)
   {
     std::cerr << "exception in file writer " << std::endl;
     std::cerr << e << std::endl;
@@ -153,7 +153,7 @@ itkGDCMImageIOTest2(int argc, char * argv[])
   {
     writer->Update();
   }
-  catch (itk::ExceptionObject & e)
+  catch (const itk::ExceptionObject & e)
   {
     std::cerr << "exception in file writer " << std::endl;
     std::cerr << e << std::endl;

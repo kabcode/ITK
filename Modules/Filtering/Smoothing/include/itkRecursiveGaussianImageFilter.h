@@ -23,12 +23,12 @@
 
 namespace itk
 {
-/**\class EnumGaussianOrderType
+/**\class GaussianOrderEnum
  * \ingroup ITKSmoothing
  * Enum type that indicates if the filter applies the equivalent operation
    of convolving with a gaussian, first derivative of a gaussian or the
    second derivative of a gaussian.  */
-enum class EnumGaussianOrderType : uint8_t
+enum class GaussianOrderEnum : uint8_t
 {
   ZeroOrder,
   FirstOrder,
@@ -100,8 +100,8 @@ public:
   itkSetMacro(Sigma, ScalarRealType);
 
   /** Enables backwards compatibility for enum values */
-  using OrderEnumType = EnumGaussianOrderType;
-#if !defined(ITK_LEGACY_REMOVE) || defined(ITK_WRAPPING) /* castxml 'enum class' workaround */
+  using OrderEnumType = GaussianOrderEnum;
+#if !defined(ITK_LEGACY_REMOVE)
   // We need to expose the enum values at the class level
   // for backwards compatibility
   static constexpr OrderEnumType ZeroOrder = OrderEnumType::ZeroOrder;
@@ -240,7 +240,7 @@ private:
 
 /** Define how to print enumerations */
 extern ITKSmoothing_EXPORT std::ostream &
-                           operator<<(std::ostream & out, const EnumGaussianOrderType value);
+                           operator<<(std::ostream & out, const GaussianOrderEnum value);
 
 } // end namespace itk
 

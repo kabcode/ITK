@@ -295,13 +295,30 @@ GDCMImageIO::Read(void * pointer)
 #endif
   SizeValueType len = image.GetBufferLength();
 
+  // Decompress the Pixel Data buffer when needed. This is required here in the
+  // pipeline to make sure to decompress JPEGBaseline1 into YBR_FULL.
+  if (image.GetTransferSyntax().IsEncapsulated())
+  {
+    gdcm::ImageChangeTransferSyntax icts;
+    icts.SetInput(image);
+    icts.SetTransferSyntax(gdcm::TransferSyntax::ImplicitVRLittleEndian);
+    if (!icts.Change())
+    {
+      itkExceptionMacro(<< "Failed to change to Implicit Transfer Syntax");
+    }
+    image = icts.GetOutput();
+  }
+
   // I think ITK only allow RGB image by pixel (and not by plane)
   if (image.GetPlanarConfiguration() == 1)
   {
     gdcm::ImageChangePlanarConfiguration icpc;
     icpc.SetInput(image);
     icpc.SetPlanarConfiguration(0);
-    icpc.Change();
+    if (!icpc.Change())
+    {
+      itkExceptionMacro(<< "Failed to change to Planar Configuration");
+    }
     image = icpc.GetOutput();
   }
 
@@ -313,6 +330,21 @@ GDCMImageIO::Read(void * pointer)
     ialut.Apply();
     image = ialut.GetOutput();
     len *= 3;
+  }
+  else if (pi == gdcm::PhotometricInterpretation::MONOCHROME1)
+  {
+    // ITK does not carry color space associated with an image. It is pretty
+    // much assumed that scalar image is expressed in MONOCHROME2 (aka min-is-black)
+    gdcm::ImageChangePhotometricInterpretation icpi;
+    icpi.SetInput(image);
+    icpi.SetPhotometricInterpretation(gdcm::PhotometricInterpretation::MONOCHROME2);
+    if (!icpi.Change())
+    {
+      itkExceptionMacro(<< "Failed to change to Photometric Interpretation");
+    }
+    itkWarningMacro(<< "Converting from MONOCHROME1 to MONOCHROME2 may impact the meaning of DICOM attributes related "
+                       "to pixel values.");
+    image = icpi.GetOutput();
   }
 
   if (!image.GetBuffer((char *)pointer))
@@ -693,22 +725,22 @@ GDCMImageIO::InternalReadImageInformation()
 #if defined(ITKIO_DEPRECATED_GDCM1_API)
   // Now is a good time to fill in the class member:
   char name[512];
-  this->GetPatientName(name);
-  this->GetPatientID(name);
-  this->GetPatientSex(name);
-  this->GetPatientAge(name);
-  this->GetStudyID(name);
-  this->GetPatientDOB(name);
-  this->GetStudyDescription(name);
-  this->GetBodyPart(name);
-  this->GetNumberOfSeriesInStudy(name);
-  this->GetNumberOfStudyRelatedSeries(name);
-  this->GetStudyDate(name);
-  this->GetModality(name);
-  this->GetManufacturer(name);
-  this->GetInstitution(name);
-  this->GetModel(name);
-  this->GetScanOptions(name);
+  this->GetPatientName(name, 512);
+  this->GetPatientID(name, 512);
+  this->GetPatientSex(name, 512);
+  this->GetPatientAge(name, 512);
+  this->GetStudyID(name, 512);
+  this->GetPatientDOB(name, 512);
+  this->GetStudyDescription(name, 512);
+  this->GetBodyPart(name, 512);
+  this->GetNumberOfSeriesInStudy(name, 512);
+  this->GetNumberOfStudyRelatedSeries(name, 512);
+  this->GetStudyDate(name, 512);
+  this->GetModality(name, 512);
+  this->GetManufacturer(name, 512);
+  this->GetInstitution(name, 512);
+  this->GetModel(name, 512);
+  this->GetScanOptions(name, 512);
 #endif
 }
 
@@ -1217,11 +1249,11 @@ GDCMImageIO::Write(const void * buffer)
   if (m_UseCompression)
   {
     gdcm::ImageChangeTransferSyntax change;
-    if (m_CompressionType == TCompressionType::JPEG)
+    if (m_CompressionType == CompressionEnum::JPEG)
     {
       change.SetTransferSyntax(gdcm::TransferSyntax::JPEGLosslessProcess14_1);
     }
-    else if (m_CompressionType == TCompressionType::JPEG2000)
+    else if (m_CompressionType == CompressionEnum::JPEG2000)
     {
       change.SetTransferSyntax(gdcm::TransferSyntax::JPEG2000Lossless);
     }
@@ -1301,147 +1333,163 @@ GDCMImageIO::Write(const void * buffer)
 // Convenience methods to query patient and scanner information. These
 // methods are here for compatibility with the DICOMImageIO2 class.
 void
-GDCMImageIO::GetPatientName(char * name)
+GDCMImageIO::GetPatientName(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0010|0010", m_PatientName);
-  strcpy(name, m_PatientName.c_str());
+  strncpy(name, m_PatientName.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetPatientID(char * name)
+GDCMImageIO::GetPatientID(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0010|0020", m_PatientID);
-  strcpy(name, m_PatientID.c_str());
+  strncpy(name, m_PatientID.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetPatientSex(char * name)
+GDCMImageIO::GetPatientSex(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0010|0040", m_PatientSex);
-  strcpy(name, m_PatientSex.c_str());
+  strncpy(name, m_PatientSex.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetPatientAge(char * name)
+GDCMImageIO::GetPatientAge(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0010|1010", m_PatientAge);
-  strcpy(name, m_PatientAge.c_str());
+  strncpy(name, m_PatientAge.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetStudyID(char * name)
+GDCMImageIO::GetStudyID(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0020|0010", m_StudyID);
-  strcpy(name, m_StudyID.c_str());
+  strncpy(name, m_StudyID.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetPatientDOB(char * name)
+GDCMImageIO::GetPatientDOB(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0010|0030", m_PatientDOB);
-  strcpy(name, m_PatientDOB.c_str());
+  strncpy(name, m_PatientDOB.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetStudyDescription(char * name)
+GDCMImageIO::GetStudyDescription(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0008|1030", m_StudyDescription);
-  strcpy(name, m_StudyDescription.c_str());
+  strncpy(name, m_StudyDescription.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetBodyPart(char * name)
+GDCMImageIO::GetBodyPart(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0018|0015", m_BodyPart);
-  strcpy(name, m_BodyPart.c_str());
+  strncpy(name, m_BodyPart.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetNumberOfSeriesInStudy(char * name)
+GDCMImageIO::GetNumberOfSeriesInStudy(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0020|1000", m_NumberOfSeriesInStudy);
-  strcpy(name, m_NumberOfSeriesInStudy.c_str());
+  strncpy(name, m_NumberOfSeriesInStudy.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetNumberOfStudyRelatedSeries(char * name)
+GDCMImageIO::GetNumberOfStudyRelatedSeries(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0020|1206", m_NumberOfStudyRelatedSeries);
-  strcpy(name, m_NumberOfStudyRelatedSeries.c_str());
+  strncpy(name, m_NumberOfStudyRelatedSeries.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetStudyDate(char * name)
+GDCMImageIO::GetStudyDate(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0008|0020", m_StudyDate);
-  strcpy(name, m_StudyDate.c_str());
+  strncpy(name, m_StudyDate.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetModality(char * name)
+GDCMImageIO::GetModality(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0008|0060", m_Modality);
-  strcpy(name, m_Modality.c_str());
+  strncpy(name, m_Modality.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetManufacturer(char * name)
+GDCMImageIO::GetManufacturer(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0008|0070", m_Manufacturer);
-  strcpy(name, m_Manufacturer.c_str());
+  strncpy(name, m_Manufacturer.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetInstitution(char * name)
+GDCMImageIO::GetInstitution(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0008|0080", m_Institution);
-  strcpy(name, m_Institution.c_str());
+  strncpy(name, m_Institution.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetModel(char * name)
+GDCMImageIO::GetModel(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0008|1090", m_Model);
-  strcpy(name, m_Model.c_str());
+  strncpy(name, m_Model.c_str(), len);
+  name[len - 1] = '\0';
 }
 
 void
-GDCMImageIO::GetScanOptions(char * name)
+GDCMImageIO::GetScanOptions(char * name, size_t len)
 {
   MetaDataDictionary & dict = this->GetMetaDataDictionary();
 
   ExposeMetaData<std::string>(dict, "0018|0022", m_ScanOptions);
-  strcpy(name, m_ScanOptions.c_str());
+  strncpy(name, m_ScanOptions.c_str(), len);
+  name[len - 1] = '\0';
 }
 #endif
 
@@ -1477,11 +1525,11 @@ GDCMImageIO::InternalSetCompressor(const std::string & _compressor)
 
   if (_compressor == "" || _compressor == "JPEG2000")
   {
-    m_CompressionType = TCompressionType::JPEG2000;
+    m_CompressionType = CompressionEnum::JPEG2000;
   }
   else if (_compressor == "JPEG")
   {
-    m_CompressionType = TCompressionType::JPEG;
+    m_CompressionType = CompressionEnum::JPEG;
   }
   else
   {
@@ -1526,21 +1574,21 @@ GDCMImageIO::PrintSelf(std::ostream & os, Indent indent) const
 
 /** Print enum values */
 std::ostream &
-operator<<(std::ostream & out, const GDCMImageIO::TCompressionType value)
+operator<<(std::ostream & out, const GDCMImageIO::CompressionEnum value)
 {
   return out << [value] {
     switch (value)
     {
-      case GDCMImageIO::TCompressionType::JPEG:
-        return "GDCMImageIO::TCompressionType::JPEG";
-      case GDCMImageIO::TCompressionType::JPEG2000:
-        return "GDCMImageIO::TCompressionType::JPEG2000";
-      case GDCMImageIO::TCompressionType::JPEGLS:
-        return "GDCMImageIO::TCompressionType::JPEGLS";
-      case GDCMImageIO::TCompressionType::RLE:
-        return "GDCMImageIO::TCompressionType::RLE";
+      case GDCMImageIO::CompressionEnum::JPEG:
+        return "GDCMImageIO::CompressionEnum::JPEG";
+      case GDCMImageIO::CompressionEnum::JPEG2000:
+        return "GDCMImageIO::CompressionEnum::JPEG2000";
+      case GDCMImageIO::CompressionEnum::JPEGLS:
+        return "GDCMImageIO::CompressionEnum::JPEGLS";
+      case GDCMImageIO::CompressionEnum::RLE:
+        return "GDCMImageIO::CompressionEnum::RLE";
       default:
-        return "INVALID VALUE FOR GDCMImageIO::TCompressionType";
+        return "INVALID VALUE FOR GDCMImageIO::CompressionEnum";
     }
   }();
 }

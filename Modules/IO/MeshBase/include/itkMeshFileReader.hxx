@@ -477,14 +477,14 @@ MeshFileReader<TOutputMesh, ConvertPointPixelTraits, ConvertCellPixelTraits>::Ge
     m_ExceptionMessage = "";
     this->TestFileExistanceAndReadability();
   }
-  catch (itk::ExceptionObject & err)
+  catch (const itk::ExceptionObject & err)
   {
     m_ExceptionMessage = err.GetDescription();
   }
 
   if (m_UserSpecifiedMeshIO == false) // try creating via factory
   {
-    m_MeshIO = MeshIOFactory::CreateMeshIO(m_FileName.c_str(), MeshIOFactory::FileModeType::ReadMode);
+    m_MeshIO = MeshIOFactory::CreateMeshIO(m_FileName.c_str(), MeshIOFactory::FileModeEnum::ReadMode);
   }
 
   if (m_MeshIO.IsNull())
@@ -534,7 +534,7 @@ MeshFileReader<TOutputMesh, ConvertPointPixelTraits, ConvertCellPixelTraits>::Ge
     m_ExceptionMessage = "";
     this->TestFileExistanceAndReadability();
   }
-  catch (itk::ExceptionObject & err)
+  catch (const itk::ExceptionObject & err)
   {
     m_ExceptionMessage = err.GetDescription();
   }

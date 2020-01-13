@@ -26,6 +26,7 @@
 #include "itkMath.h"
 #include "itkProgressReporter.h"
 #include "itkMetaDataObject.h"
+#include <iomanip>
 
 namespace itk
 {
@@ -205,10 +206,12 @@ ImageSeriesReader<TOutputImage>::GenerateOutputInformation()
     if (Math::AlmostEquals(dirNnorm, 0.0))
     {
       spacing[this->m_NumberOfDimensionsInImage] = 1.0;
+      this->m_SpacingDefined = false;
     }
     else
     {
       spacing[this->m_NumberOfDimensionsInImage] = dirNnorm / (numberOfFiles - 1);
+      this->m_SpacingDefined = true;
       if (!m_ForceOrthogonalDirection)
       {
         for (j = 0; j < TOutputImage::ImageDimension; ++j)
@@ -294,6 +297,11 @@ ImageSeriesReader<TOutputImage>::GenerateData()
   IndexType                                  sliceStartIndex = requestedRegion.GetIndex();
   const auto                                 numberOfFiles = static_cast<int>(m_FileNames.size());
 
+  typename TOutputImage::PointType   prevSliceOrigin = output->GetOrigin();
+  typename TOutputImage::SpacingType outputSpacing = output->GetSpacing();
+  double                             maxSpacingDeviation = 0.0;
+  bool                               prevSliceIsValid = false;
+
   for (int i = 0; i != numberOfFiles; ++i)
   {
     if (TOutputImage::ImageDimension != this->m_NumberOfDimensionsInImage)
@@ -303,6 +311,8 @@ ImageSeriesReader<TOutputImage>::GenerateData()
 
     const bool insideRequestedRegion = requestedRegion.IsInside(sliceStartIndex);
     const int  iFileName = (m_ReverseOrder ? numberOfFiles - i - 1 : i);
+    bool       nonUniformSampling = false;
+    double     spacingDeviation = 0.0;
 
     // check if we need this slice
     if (!insideRequestedRegion && !needToUpdateMetaDataDictionaryArray)
@@ -408,9 +418,50 @@ ImageSeriesReader<TOutputImage>::GenerateData()
         ImageAlgorithm::Copy(readerOutput, output, sliceRegionToRequest, outRegion);
       }
 
+      // verify that slice spacing is the expected one
+      // since we can be skipping some slices because they are outside of requested region
+      // I am using additional variable
+      if (prevSliceIsValid)
+      {
+        typename TOutputImage::PointType sliceOrigin = readerOutput->GetOrigin();
+        using SpacingScalarType = typename TOutputImage::SpacingValueType;
+        Vector<SpacingScalarType, TOutputImage::ImageDimension> dirN;
+        for (size_t j = 0; j < TOutputImage::ImageDimension; ++j)
+        {
+          dirN[j] = static_cast<SpacingScalarType>(sliceOrigin[j]) - static_cast<SpacingScalarType>(prevSliceOrigin[j]);
+        }
+        SpacingScalarType dirNnorm = dirN.GetNorm();
+
+        if (this->m_SpacingDefined &&
+            !Math::AlmostEquals(
+              dirNnorm,
+              outputSpacing[this->m_NumberOfDimensionsInImage])) // either non-uniform sampling or missing slice
+        {
+          nonUniformSampling = true;
+          spacingDeviation = Math::abs(outputSpacing[this->m_NumberOfDimensionsInImage] - dirNnorm);
+          itkWarningMacro(<< "Non uniform sampling or missing slices detected , expected " << std::setprecision(14)
+                          << outputSpacing[this->m_NumberOfDimensionsInImage] << " got: " << dirNnorm
+                          << " Deviation of:" << spacingDeviation);
+
+          needToUpdateMetaDataDictionaryArray = true;
+          if (spacingDeviation > maxSpacingDeviation)
+          {
+            maxSpacingDeviation = spacingDeviation;
+            EncapsulateMetaData<double>(output->GetMetaDataDictionary(),
+                                        "ITK_non_uniform_sampling_deviation",
+                                        maxSpacingDeviation); // maximum deviation
+          }
+        }
+        prevSliceOrigin = sliceOrigin;
+      }
+      else
+      {
+        prevSliceOrigin = readerOutput->GetOrigin();
+        prevSliceIsValid = true;
+      }
+
       // report progress for read slices
       progress.CompletedPixel();
-
     } // end !insidedRequestedRegion
 
     // Deep copy the MetaDataDictionary into the array
@@ -418,6 +469,11 @@ ImageSeriesReader<TOutputImage>::GenerateData()
     {
       auto newDictionary = new DictionaryType;
       *newDictionary = reader->GetImageIO()->GetMetaDataDictionary();
+      if (nonUniformSampling)
+      {
+        // slice-specific information
+        EncapsulateMetaData<double>(*newDictionary, "ITK_non_uniform_sampling_deviation", spacingDeviation);
+      }
       m_MetaDataDictionaryArray.push_back(newDictionary);
     }
 
@@ -439,7 +495,7 @@ ImageSeriesReader<TOutputImage>::GetMetaDataDictionaryArray() const
   if (this->m_OutputInformationMTime > this->m_MetaDataDictionaryArrayMTime)
   {
     itkWarningMacro("The MetaDataDictionaryArray is not up to date. This is no longer updated in the "
-                    "UpdateOutputInformation method but in GenerateData.")
+                    "UpdateOutputInformation method but in GenerateData.");
   }
   return &m_MetaDataDictionaryArray;
 }

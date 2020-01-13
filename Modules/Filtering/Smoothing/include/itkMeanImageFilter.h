@@ -22,6 +22,8 @@
 #include "itkImage.h"
 #include "itkNumericTraits.h"
 
+#include <vector>
+
 namespace itk
 {
 /** \class MeanImageFilter
@@ -102,6 +104,14 @@ protected:
    *     BoxImageFilter::GenerateData() */
   void
   DynamicThreadedGenerateData(const OutputImageRegionType & outputRegionForThread) override;
+
+private:
+  template <typename TPixelAccessPolicy>
+  static void
+  GenerateDataInSubregion(const TInputImage &                              inputImage,
+                          TOutputImage &                                   outputImage,
+                          const ImageRegion<InputImageDimension> &         imageRegion,
+                          const std::vector<Offset<InputImageDimension>> & neighborhoodOffsets);
 };
 } // end namespace itk
 

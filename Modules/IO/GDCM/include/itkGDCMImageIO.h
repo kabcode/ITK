@@ -183,52 +183,52 @@ public:
    * Instead user are encourage to use directly the GetValueFromTag function
    */
   void
-  GetPatientName(char * name);
+  GetPatientName(char * name, size_t len = 512);
 
   void
-  GetPatientID(char * id);
+  GetPatientID(char * id, size_t len = 512);
 
   void
-  GetPatientSex(char * sex);
+  GetPatientSex(char * sex, size_t len = 512);
 
   void
-  GetPatientAge(char * age);
+  GetPatientAge(char * age, size_t len = 512);
 
   void
-  GetStudyID(char * id);
+  GetStudyID(char * id, size_t len = 512);
 
   void
-  GetPatientDOB(char * dob);
+  GetPatientDOB(char * dob, size_t len = 512);
 
   void
-  GetStudyDescription(char * desc);
+  GetStudyDescription(char * desc, size_t len = 512);
 
   void
-  GetBodyPart(char * part);
+  GetBodyPart(char * part, size_t len = 512);
 
   void
-  GetNumberOfSeriesInStudy(char * series);
+  GetNumberOfSeriesInStudy(char * series, size_t len = 512);
 
   void
-  GetNumberOfStudyRelatedSeries(char * series);
+  GetNumberOfStudyRelatedSeries(char * series, size_t len = 512);
 
   void
-  GetStudyDate(char * date);
+  GetStudyDate(char * date, size_t len = 512);
 
   void
-  GetModality(char * modality);
+  GetModality(char * modality, size_t len = 512);
 
   void
-  GetManufacturer(char * manu);
+  GetManufacturer(char * manu, size_t len = 512);
 
   void
-  GetInstitution(char * ins);
+  GetInstitution(char * ins, size_t len = 512);
 
   void
-  GetModel(char * model);
+  GetModel(char * model, size_t len = 512);
 
   void
-  GetScanOptions(char * options);
+  GetScanOptions(char * options, size_t len = 512);
 #endif
 
   /** More general method to retrieve an arbitrary DICOM value based
@@ -325,28 +325,28 @@ public:
   }
 #endif
 
-  /** \class TCompressionType
+  /** \class CompressionEnum
    *
    * \ingroup ITKIOGDCM
    * Set/Get a compression type to use. */
-  enum class TCompressionType : uint8_t
+  enum class CompressionEnum : uint8_t
   {
     JPEG = 0,
     JPEG2000,
     JPEGLS,
     RLE
   };
-#if !defined(ITK_LEGACY_REMOVE) || defined(ITK_WRAPPING) /* castxml 'enum class' workaround */
+#if !defined(ITK_LEGACY_REMOVE)
   // We need to expose the enum values at the class level
   // for backwards compatibility
-  static constexpr TCompressionType JPEG = TCompressionType::JPEG;
-  static constexpr TCompressionType JPEG2000 = TCompressionType::JPEG2000;
-  static constexpr TCompressionType JPEGLS = TCompressionType::JPEGLS;
-  static constexpr TCompressionType RLE = TCompressionType::RLE;
+  static constexpr CompressionEnum JPEG = CompressionEnum::JPEG;
+  static constexpr CompressionEnum JPEG2000 = CompressionEnum::JPEG2000;
+  static constexpr CompressionEnum JPEGLS = CompressionEnum::JPEGLS;
+  static constexpr CompressionEnum RLE = CompressionEnum::RLE;
 #endif
 
-  itkSetEnumMacro(CompressionType, TCompressionType);
-  itkGetEnumMacro(CompressionType, TCompressionType);
+  itkSetEnumMacro(CompressionType, CompressionEnum);
+  itkGetEnumMacro(CompressionType, CompressionEnum);
 
   void
   InternalSetCompressor(const std::string & _compressor) override;
@@ -396,8 +396,8 @@ private:
 
   /** defines whether this image is a 2D out of a 2D image
    *  or a 2D out of a 3D image. */
-  unsigned int     m_GlobalNumberOfDimensions;
-  TCompressionType m_CompressionType;
+  unsigned int    m_GlobalNumberOfDimensions;
+  CompressionEnum m_CompressionType;
 
   ImageIOBase::IOComponentType m_InternalComponentType;
   InternalHeader *             m_DICOMHeader;
@@ -405,7 +405,7 @@ private:
 
 // Define how to print enumeration
 extern ITKIOGDCM_EXPORT std::ostream &
-                        operator<<(std::ostream & out, const GDCMImageIO::TCompressionType value);
+                        operator<<(std::ostream & out, const GDCMImageIO::CompressionEnum value);
 
 } // end namespace itk
 

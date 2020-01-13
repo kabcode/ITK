@@ -72,7 +72,7 @@ itkFFTConvolutionImageFilterTest(int argc, char * argv[])
     std::cerr << "Failed to throw expected exception" << std::endl;
     return EXIT_FAILURE;
   }
-  catch (itk::ExceptionObject & excp)
+  catch (const itk::ExceptionObject & excp)
   {
     std::cout << excp << std::endl;
     std::cout << "Caught EXPECTED exception for empty image as input" << std::endl;
@@ -132,13 +132,13 @@ itkFFTConvolutionImageFilterTest(int argc, char * argv[])
     std::string outputRegionMode(argv[6]);
     if (outputRegionMode == "SAME")
     {
-      convoluter->SetOutputRegionMode(itk::ConvolutionImageFilterOutputRegionType::SAME);
-      ITK_TEST_SET_GET_VALUE(itk::ConvolutionImageFilterOutputRegionType::SAME, convoluter->GetOutputRegionMode());
+      convoluter->SetOutputRegionMode(itk::ConvolutionImageFilterOutputRegionEnum::SAME);
+      ITK_TEST_SET_GET_VALUE(itk::ConvolutionImageFilterOutputRegionEnum::SAME, convoluter->GetOutputRegionMode());
     }
     else if (outputRegionMode == "VALID")
     {
-      convoluter->SetOutputRegionMode(itk::ConvolutionImageFilterOutputRegionType::VALID);
-      ITK_TEST_SET_GET_VALUE(itk::ConvolutionImageFilterOutputRegionType::VALID, convoluter->GetOutputRegionMode());
+      convoluter->SetOutputRegionMode(itk::ConvolutionImageFilterOutputRegionEnum::VALID);
+      ITK_TEST_SET_GET_VALUE(itk::ConvolutionImageFilterOutputRegionEnum::VALID, convoluter->GetOutputRegionMode());
     }
     else
     {
@@ -150,12 +150,12 @@ itkFFTConvolutionImageFilterTest(int argc, char * argv[])
     if (outputRegionMode == "SAME")
     {
       convoluter->SetOutputRegionModeToSame();
-      ITK_TEST_SET_GET_VALUE(ConvolutionFilterType::OutputRegionModeType::SAME, convoluter->GetOutputRegionMode());
+      ITK_TEST_SET_GET_VALUE(ConvolutionFilterType::OutputRegionModeEnum::SAME, convoluter->GetOutputRegionMode());
     }
     else
     {
       convoluter->SetOutputRegionModeToValid();
-      ITK_TEST_SET_GET_VALUE(ConvolutionFilterType::OutputRegionModeType::VALID, convoluter->GetOutputRegionMode());
+      ITK_TEST_SET_GET_VALUE(ConvolutionFilterType::OutputRegionModeEnum::VALID, convoluter->GetOutputRegionMode());
     }
   }
 

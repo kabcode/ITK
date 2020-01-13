@@ -254,7 +254,7 @@ master, November 2016 or later, (Girder > 2.0.0).
 Archive the `InsightData` contents on ITK's file server at Kitware:
 
 ```sh
-   rsync -v -r ${ExternalData_OBJECT_STORES}/MD5/ public:/projects/Insight/WWW/InsightWeb/files/ExternalData/MD5/
+   rsync -vrt ${ExternalData_OBJECT_STORES}/MD5/ kitware@public:ITKExternalData/MD5/
 ```
 
 Update the data archive at https://github.com/InsightSoftwareConsortium/ITKTestingData.
@@ -372,11 +372,11 @@ This will generate tarballs for the source and testing data.
 
 ### Windows
 
-From a `git` bash shell with `wget` in `PATH`, run:
+From a Git Bash shell, run:
 
 ```sh
    ./Utilities/Maintenance/SourceTarball.bash --zip
-``
+```
 
 This should be done on Windows so that the sources have Windows-style newline
 endings.
@@ -516,7 +516,7 @@ virtualenv itk-venv
 git clone https://github.com/InsightSoftwareConsortium/ITKExamples
 mkdir ITKExamples-build
 cd ITKExamples-build
-cmake -DITK_DIR=/path/to/ITK-build -DPYTHON_EXECUTABLE=../itk-venv/bin/python ../ITKExamples
+cmake -DITK_DIR=/path/to/ITK-build -DPython3_ROOT_DIR=../itk-venv/bin/python -DPython3_FIND_VIRTUALENV=ONLY ../ITKExamples
 ctest -R Python
 ```
 
@@ -766,10 +766,29 @@ configurations as possible.
 Release Notes Posts
 -------------------
 
+To get started with the release notes, first use the download link
+cookiecutter to generate Markdown and webpage Download page HTML:
+
+```
+pip install cookiecutter
+cookiecutter ~/src/ITK/Utilities/Maintenance/DownloadLinksCookieCutter/
+```
+
+Start with the previous GitHub Release markdown content to produce the
+release notes.
+
+To generate the changelog by running
+
 ```sh
    cd ITK
-   git shortlog --topo-order --no-merges v$old_version..v$new_version
+   ./Utilities/Maintenance/AuthorsChangesSince.py $old_version
 ```
+
+The log is generated at */tmp/AuthorsChangesSince/Changelog.txt*.
+
+The count of recent authors is found in the script output, and a list of new authors
+are found at */tmp/AuthorsChangesSince/NewAuthors.txt*.
+
 
 Announcing
 ----------
@@ -781,6 +800,7 @@ For the final release, the release notes produced should be used to
   * Create a post in the [Kitware blog]
   * Add a release note doc in [ITK/Documentation/ReleaseNotes](https://github.com/InsightSoftwareConsortium/ITK/tree/master/Documentation/ReleaseNotes)
   * Create a post in ITK project on [ResearchGate]
+  * Update [ITK's Wikipedia page](https://en.wikipedia.org/wiki/Insight_Segmentation_and_Registration_Toolkit).
 
 Finally, inform Communications at <comm@kitware.com>.
 
